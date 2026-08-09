@@ -87,8 +87,8 @@ Se valoró cambiar el nombre pero se decidió **mantener "Arma tu Cartel"**. Pun
 ## Roadmap de funcionalidades
 
 **Antes de lanzamiento público (pendiente):**
-- Meta tags Open Graph + favicon + meta description (para que compartir el enlace se vea bien en redes) — **no implementado todavía**.
-- Analítica básica y respetuosa con privacidad (Plausible/Fathom o similar) — **no implementado**.
+- ~~Meta tags Open Graph + favicon + meta description~~ — **hecho**: description, OG, Twitter Card, favicon (emoji 🎪 provisional), theme-color y `og-image.jpg` (1200x630, generado por Canvas a partir de los assets reales) en index.html.
+- ~~Analítica básica y respetuosa con privacidad~~ — **hecho**: GoatCounter (sitio `armatucartel`, sin cookies, sin banner de consentimiento). Script en `index.html`. Eventos custom vía `trackEvent()` en js/app.js: `game-started` (startGame), `game-completed` (showResult), `poster-downloaded` (click en posterDownloadLink).
 - Pasada de QA visual en navegadores/dispositivos reales — **nunca hecha**.
 - Aviso legal dentro de la propia app (ya está en el README, falta dentro del juego) sobre datos ficticios / juego de fans no oficial, dado que usa nombres y fotos reales de artistas.
 

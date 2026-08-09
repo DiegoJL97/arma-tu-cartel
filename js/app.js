@@ -1,5 +1,12 @@
 (function(){
 
+  /* ---------- analytics ---------- */
+  function trackEvent(name){
+    if(window.goatcounter && typeof window.goatcounter.count === 'function'){
+      window.goatcounter.count({ path: name, title: name, event: true });
+    }
+  }
+
   /* ---------- i18n ---------- */
   var LANG_KEY = 'armaTuCartelLang';
   var currentLang = 'es';
@@ -647,6 +654,7 @@
 
   /* ---------- game logic ---------- */
   function startGame(){
+    trackEvent('game-started');
     state.pool = shuffle(ARTISTS);
     state.lineup = [];
     state.round = 1;
@@ -1230,6 +1238,7 @@
   }
 
   function showResult(){
+    trackEvent('game-completed');
     var n = state.lineup.length;
     var totalAttendance = state.lineup.reduce(function(s,a){ return s + a.attendance; }, 0);
     var avgLive = Math.round(state.lineup.reduce(function(s,a){ return s + a.live; }, 0) / n);
@@ -1545,6 +1554,10 @@
       }
     });
   }
+
+  document.getElementById('posterDownloadLink').addEventListener('click', function(){
+    trackEvent('poster-downloaded');
+  });
 
   document.getElementById('posterShareBtn').addEventListener('click', function(){
     if(!lastPosterBlob) return;
