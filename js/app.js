@@ -10,7 +10,7 @@
 
   var TRANSLATIONS = {
     es: {
-      pageTitle: 'Arma tu Cartel — Reggaetón Draft',
+      pageTitle: 'Arma tu Cartel',
       brand: 'Arma tu Cartel',
       landing: {
         collageCaption: 'Elige entre más de 100 artistas reales del género urbano',
@@ -80,7 +80,7 @@
       share: { myLineup: 'Mi cartel' }
     },
     en: {
-      pageTitle: 'Build Your Lineup — Reggaetón Draft',
+      pageTitle: 'Build Your Lineup',
       brand: 'Build Your Lineup',
       landing: {
         collageCaption: 'Choose from over 100 real urban genre artists',

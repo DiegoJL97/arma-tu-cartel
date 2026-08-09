@@ -41,7 +41,15 @@ Vanilla HTML, CSS y JavaScript. Sin frameworks, sin build step ni dependencias e
 
 ## Ejecutarlo en local
 
-Al usar rutas de imagen relativas, hay que servir la carpeta por HTTP (abrir `index.html` directamente con doble clic puede no cargar las imágenes en algunos navegadores). La forma más simple:
+Hay que servir la carpeta por HTTP — **no abrir `index.html` con doble clic**. Bajo `file://` el navegador trata las imágenes como origen cruzado y "contamina" el canvas del póster, así que `canvas.toDataURL()` lanza un `SecurityError` y la pantalla de resultado se queda sin póster ni botones (descargar, jugar de nuevo...), sin ningún aviso visible más allá de la consola.
+
+Con Node.js instalado, la forma más simple:
+
+```bash
+npm run serve
+```
+
+O con Python:
 
 ```bash
 python3 -m http.server 8000

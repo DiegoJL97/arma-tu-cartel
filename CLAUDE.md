@@ -24,7 +24,7 @@ images/
 
 **Importante sobre `poster-bg.webp`**: el código de generación del póster (`buildPosterCanvas`, `computePosterLayout`) asume que esta imagen mide exactamente `POSTER_BG_SRC_W=1536` x `POSTER_BG_SRC_H=1024` px. Si se sustituye por otra imagen con otras dimensiones, hay que actualizar esas dos constantes (y `POSTER_BG_SCALE = POSTER_WIDTH / POSTER_BG_SRC_W`) o el póster saldrá mal recortado/escalado.
 
-**Requiere servirse por HTTP**, no abrir `index.html` con doble clic — las rutas de imagen son relativas y algunos navegadores no las resuelven bien sobre `file://`. Para probar en local: `python3 -m http.server 8000` y abrir `http://localhost:8000`.
+**Requiere servirse por HTTP**, no abrir `index.html` con doble clic. Bajo `file://` las imágenes se cargan como origen cruzado, lo que "contamina" el canvas del póster: `canvas.toDataURL()` en `generatePoster()` (js/app.js) lanza `SecurityError`, y como esa llamada precede a `posterPreviewBox.classList.add('show')`, toda la caja del póster **y sus 4 botones** (descargar, compartir, jugar de nuevo, sugerencia) se quedan en `display:none` sin ningún aviso visible salvo el error en consola. Para probar en local: `npm run serve` (o `python3 -m http.server 8000`) y abrir `http://localhost:8000`.
 
 Antes de esta migración todo (incluidas las 108 fotos) iba embebido en base64 dentro del propio HTML, que pesaba ~11,5MB. Ahora el HTML pesa ~111KB y las imágenes se piden bajo demanda (el navegador solo descarga la foto de un artista cuando ese artista se renderiza realmente en pantalla — no hace falta lazy-loading manual, es automático por cómo funciona `background-image: url(...)`).
 
