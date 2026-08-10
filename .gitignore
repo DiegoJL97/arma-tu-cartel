@@ -2,3 +2,11 @@ node_modules/
 *.log
 .DS_Store
 Thumbs.db
+
+# Cloudflare / wrangler.
+# .dev.vars es donde wrangler busca los secretos al ejecutar `wrangler dev`
+# en local: si algun dia lo usas, ese fichero contendra el IP_SALT real.
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.wrangler/

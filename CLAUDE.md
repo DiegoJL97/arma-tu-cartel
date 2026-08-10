@@ -79,6 +79,34 @@ Tres trampas del móvil que ya costaron un bug y conviene no repetir:
 
 Medido en navegador real a 375×812: inicio, juego y simulación sin scroll; resultado ~2px. En 375×667 (iPhone SE) los botones de decisión quedan sobre el pliegue, con ~60px de scroll solo para alcanzar el botón de saltar. Existe un bloque `@media (max-width:767px) and (max-height:700px)` que recorta lo prescindible en móviles bajos (oculta el badge de directo, aprieta márgenes).
 
+## Clasificación (semanal y global)
+
+Primera funcionalidad con backend. El sitio sigue siendo estático; la API es un Worker aparte.
+
+**Estructura:**
+```
+api/
+  schema.sql      tabla scores + indices (D1 / SQLite)
+  worker.js       GET /api/leaderboard, POST /api/score
+  wrangler.toml   binding de D1 y ALLOW_ORIGINS
+```
+
+**Interruptor**: la URL del Worker se configura en `index.html` con `<meta name="atc-api-base" content="...">`. **Vacío = clasificación desactivada**: el juego funciona igual y el enlace del inicio, el botón del resultado y el bloque de publicar se ocultan solos (`applyLeaderboardVisibility`). Los tests jsdom corren así, sin backend.
+
+**Decisiones de diseño:**
+- El alias se pide **al final**, en la pantalla de resultado, no antes de jugar: pedirlo antes metía un formulario en el punto de máximo abandono. Se guarda en `localStorage` (`armaTuCartelAlias`, `armaTuCartelCountry`, `armaTuCartelClientId`).
+- Una sola tabla cubre ambas clasificaciones: la semanal filtra por `iso_week` (así el reinicio no necesita ninguna tarea programada) y las dos se deduplican por `client_id` para quedarse con el mejor cartel de cada jugador.
+- Los nombres de país **no se traducen a mano**: salen de `Intl.DisplayNames` en el idioma activo, y la bandera se compone del código ISO con indicadores regionales. No hay lista de países duplicada.
+- En móvil el bloque de publicar va **al final** de la pantalla de resultado (`order:1`), porque mide ~160px y empujaba el póster y los botones de compartir por debajo del pliegue.
+
+**Seguridad — leer antes de tocar esto:**
+- El alias lo escriben desconocidos y se muestra a otros usuarios: `lbRowMarkup()` pasa **siempre** por `escapeHtml()`. Verificado con un alias que contiene `<script>`.
+- La puntuación la calcula el cliente, así que **es falsificable**. El Worker solo valida rangos y coherencia, y deja `verified = 0`. La solución real es la fase 2: sustituir `Math.random()` por un RNG con semilla y que el Worker reproduzca la partida desde `(seed, lineup)`. Son ~6 puntos de azar con impacto en el juego (`shuffle` del pool, `simRollEventKey`, el señuelo de notificaciones); el confeti puede seguir sin semilla. Ojo: `simRollEventKey()` se llama dos veces por concierto (en `simRevealEvent` y en el camino de saltar), así que ver o saltar la simulación dan eventos distintos — con semilla habría que unificarlo. Esa misma pieza desbloquea el modo reto diario.
+- No se guarda la IP en claro, solo `SHA-256(IP + IP_SALT)` para limitar abuso, con una purga sugerida a los 30 días al final de `schema.sql`.
+- El filtro de alias (`BLOCKLIST` en worker.js) es mínimo y hay que ampliarlo.
+
+**Pasos pendientes en Cloudflare** (no se pueden hacer desde el repo): crear la BD, aplicar el esquema, poner el secreto `IP_SALT`, desplegar y pegar la URL en el meta tag.
+
 ## Mecánicas de juego y balance actual
 
 - 10 rondas, elección entre 3 artistas cada ronda.
@@ -121,7 +149,7 @@ Se valoró cambiar el nombre pero se decidió **mantener "Arma tu Cartel"**. Pun
 **Corto plazo:**
 - Modo "reto diario" (mismo pool de artistas para todos cada día) — la funcionalidad con más potencial viral identificada, estilo Wordle.
 - Formato de póster vertical 9:16 para Instagram Stories.
-- Leaderboard real (ahora mismo solo hay récord personal en `localStorage`, sin backend).
+- ~~Leaderboard real~~ — **fase 1 hecha** (ver sección "Clasificación"): API en `api/`, pantalla y bloque de publicar en el cliente. Pendiente: desplegar en Cloudflare y la fase 2 de verificación con semilla.
 
 **Más adelante:**
 - Modo cabeza a cabeza entre dos amigos (draft alternado).

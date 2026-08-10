@@ -1,0 +1,19 @@
+name = "arma-tu-cartel-api"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+# Enlace a la base de datos D1. El database_id lo devuelve
+#   wrangler d1 create arma-tu-cartel
+# y hay que pegarlo aqui antes del primer deploy.
+[[d1_databases]]
+binding = "DB"
+database_name = "arma-tu-cartel"
+database_id = "cbda8d1b-ac94-41f4-9e89-6226fc3180de"
+
+[vars]
+# Origenes autorizados a llamar la API. Sustituir por el dominio real
+# cuando este desplegado. '*' deja pasar a cualquiera.
+ALLOW_ORIGINS = "http://localhost:8000,https://armatucartel.com"
+
+# IP_SALT no va aqui: es un secreto.
+#   wrangler secret put IP_SALT

@@ -85,7 +85,42 @@
       },
       mailto: { subject: 'Sugerencia - Arma tu Cartel' },
       poster: { title: 'ARMA TU CARTEL' },
-      share: { myLineup: 'Mi cartel' }
+      share: { myLineup: 'Mi cartel' },
+      lb: {
+        viewBtn: '🏆 Ver clasificación',
+        title: 'Clasificación',
+        subtitle: 'LOS MEJORES CARTELES',
+        tabWeek: 'ESTA SEMANA',
+        tabGlobal: 'GLOBAL',
+        playBtn: '🎪 Jugar una partida',
+        backBtn: 'Volver',
+        loading: 'Cargando clasificación...',
+        error: 'No se ha podido cargar la clasificación. Inténtalo más tarde.',
+        empty: 'Todavía no hay ningún cartel publicado. Sé el primero.',
+        pts: 'PTS',
+        you: 'TÚ',
+        genresShort: 'géneros',
+        justNow: 'ahora mismo',
+        minsAgo: 'hace {n} min',
+        hoursAgo: 'hace {n} h',
+        yesterday: 'ayer',
+        daysAgo: 'hace {n} días',
+        resetsInDays: 'Se reinicia en {d} d {h} h',
+        resetsInHours: 'Se reinicia en {h} h',
+        totalCarteles: '{n} carteles registrados',
+        totalCartelesOne: '1 cartel registrado',
+        topPercent: 'Estás en el top {p} de {n} carteles',
+        publishTitle: 'Publica tu puntuación',
+        aliasPlaceholder: 'Tu alias',
+        countryLabel: 'País',
+        publishBtn: 'Publicar en la clasificación',
+        publishing: 'Publicando...',
+        publishedRank: '✅ Publicado: vas #{rank} de {total} esta semana',
+        publishError: 'No se ha podido publicar. Inténtalo de nuevo.',
+        aliasTooShort: 'El alias necesita al menos 2 caracteres.',
+        aliasRejected: 'Ese alias no se admite. Prueba con otro.',
+        rateLimited: 'Demasiados envíos seguidos. Espera un rato.'
+      }
     },
     en: {
       pageTitle: 'Build Your Lineup',
@@ -156,7 +191,42 @@
       },
       mailto: { subject: 'Suggestion - Build Your Lineup' },
       poster: { title: 'BUILD YOUR LINEUP' },
-      share: { myLineup: 'My lineup' }
+      share: { myLineup: 'My lineup' },
+      lb: {
+        viewBtn: '🏆 View leaderboard',
+        title: 'Leaderboard',
+        subtitle: 'THE BEST LINEUPS',
+        tabWeek: 'THIS WEEK',
+        tabGlobal: 'ALL TIME',
+        playBtn: '🎪 Play a round',
+        backBtn: 'Back',
+        loading: 'Loading leaderboard...',
+        error: "Couldn't load the leaderboard. Try again later.",
+        empty: 'No lineups published yet. Be the first.',
+        pts: 'PTS',
+        you: 'YOU',
+        genresShort: 'genres',
+        justNow: 'just now',
+        minsAgo: '{n} min ago',
+        hoursAgo: '{n} h ago',
+        yesterday: 'yesterday',
+        daysAgo: '{n} days ago',
+        resetsInDays: 'Resets in {d} d {h} h',
+        resetsInHours: 'Resets in {h} h',
+        totalCarteles: '{n} lineups registered',
+        totalCartelesOne: '1 lineup registered',
+        topPercent: "You're in the top {p} of {n} lineups",
+        publishTitle: 'Publish your score',
+        aliasPlaceholder: 'Your alias',
+        countryLabel: 'Country',
+        publishBtn: 'Publish to the leaderboard',
+        publishing: 'Publishing...',
+        publishedRank: "✅ Published: you're #{rank} of {total} this week",
+        publishError: "Couldn't publish. Please try again.",
+        aliasTooShort: 'Your alias needs at least 2 characters.',
+        aliasRejected: "That alias isn't allowed. Try another one.",
+        rateLimited: 'Too many submissions. Please wait a while.'
+      }
     }
   };
 
@@ -1300,6 +1370,7 @@
     };
 
     refreshResultTexts();
+    refreshPublishBox();
 
     showScreen('screen-result');
     resultConfettiBurst();
@@ -1343,9 +1414,359 @@
   }
 
 
+  /* ---------- LEADERBOARD ---------- */
+
+  // Base de la API (Worker de Cloudflare). Se configura en index.html con
+  //   <meta name="atc-api-base" content="https://...">
+  // Vacio = clasificacion desactivada: el juego funciona igual y las entradas
+  // a la tabla y el bloque de publicar quedan ocultos.
+  var apiMeta = document.querySelector('meta[name="atc-api-base"]');
+  var API_BASE = ((apiMeta && apiMeta.getAttribute('content')) || '').replace(/\/+$/, '');
+
+  var ALIAS_KEY = 'armaTuCartelAlias';
+  var COUNTRY_KEY = 'armaTuCartelCountry';
+  var CLIENT_KEY = 'armaTuCartelClientId';
+
+  // Paises del selector. El nombre se resuelve en el idioma activo con
+  // Intl.DisplayNames, asi que no hay que mantener 2 listas traducidas.
+  var LB_COUNTRIES = [
+    'AR','BO','BR','CL','CO','CR','CU','DO','EC','SV','ES','GT','HN','MX',
+    'NI','PA','PY','PE','PR','UY','VE','US','CA','GB','FR','DE','IT','PT',
+    'NL','BE','CH','MA','SE','AU'
+  ];
+
+  var lbState = { scope:'week', data:null, loading:false, error:false, returnTo:'screen-landing' };
+
+  function lbEnabled(){ return !!API_BASE; }
+
+  function lsGet(key){ try { return window.localStorage.getItem(key); } catch(e){ return null; } }
+  function lsSet(key, value){ try { window.localStorage.setItem(key, value); } catch(e){} }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function clientId(){
+    var id = lsGet(CLIENT_KEY);
+    if(id) return id;
+    if(window.crypto && typeof window.crypto.randomUUID === 'function'){
+      id = window.crypto.randomUUID();
+    } else {
+      id = 'c-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 12);
+    }
+    lsSet(CLIENT_KEY, id);
+    return id;
+  }
+
+  function flagEmoji(code){
+    if(!/^[A-Za-z]{2}$/.test(code || '')) return '🏳️';
+    var up = code.toUpperCase();
+    return String.fromCodePoint(0x1F1E6 + up.charCodeAt(0) - 65, 0x1F1E6 + up.charCodeAt(1) - 65);
+  }
+
+  function countryName(code){
+    try {
+      var dn = new Intl.DisplayNames([currentLang], { type:'region' });
+      return dn.of(code) || code;
+    } catch(e){ return code; }
+  }
+
+  function detectCountry(){
+    var saved = lsGet(COUNTRY_KEY);
+    if(saved && /^[A-Z]{2}$/.test(saved)) return saved;
+    var navi = window.navigator || {};
+    var langs = (navi.languages && navi.languages.length) ? navi.languages : [navi.language || ''];
+    for(var i = 0; i < langs.length; i++){
+      var m = String(langs[i]).match(/[-_]([A-Za-z]{2})$/);
+      if(m){
+        var code = m[1].toUpperCase();
+        if(LB_COUNTRIES.indexOf(code) !== -1) return code;
+      }
+    }
+    return currentLang === 'es' ? 'ES' : 'US';
+  }
+
+  function fillCountrySelect(){
+    var sel = document.getElementById('countrySelect');
+    if(!sel) return;
+    var current = sel.value || detectCountry();
+    var sorted = LB_COUNTRIES.slice().sort(function(a, b){
+      return countryName(a).localeCompare(countryName(b), currentLang);
+    });
+    sel.innerHTML = sorted.map(function(code){
+      return '<option value="' + code + '">' + flagEmoji(code) + '  ' + escapeHtml(countryName(code)) + '</option>';
+    }).join('');
+    sel.value = current;
+  }
+
+  /* --- llamadas a la API --- */
+
+  function lbFetch(path, options){
+    var controller = (typeof AbortController === 'function') ? new AbortController() : null;
+    var opts = options || {};
+    if(controller) opts.signal = controller.signal;
+    var timer = setTimeout(function(){ if(controller) controller.abort(); }, 8000);
+    return fetch(API_BASE + path, opts).then(function(res){
+      clearTimeout(timer);
+      return res.json().then(function(body){
+        if(!res.ok) throw new Error(body && body.error ? body.error : 'http_' + res.status);
+        return body;
+      });
+    }, function(err){ clearTimeout(timer); throw err; });
+  }
+
+  function loadLeaderboard(scope){
+    if(!lbEnabled()) return;
+    lbState.scope = scope;
+    lbState.loading = true;
+    lbState.error = false;
+    renderLeaderboard();
+    lbFetch('/api/leaderboard?scope=' + scope + '&limit=10&client=' + encodeURIComponent(clientId()))
+      .then(function(data){
+        if(lbState.scope !== scope) return;   // el usuario cambio de pestania
+        lbState.data = data;
+        lbState.loading = false;
+        renderLeaderboard();
+      })
+      .catch(function(){
+        if(lbState.scope !== scope) return;
+        lbState.loading = false;
+        lbState.error = true;
+        renderLeaderboard();
+      });
+  }
+
+  function submitScore(){
+    var aliasEl = document.getElementById('aliasInput');
+    var countryEl = document.getElementById('countrySelect');
+    var btn = document.getElementById('publishBtn');
+    var msg = document.getElementById('publishMsg');
+    if(!aliasEl || !countryEl || !state.resultStats) return;
+
+    var alias = aliasEl.value.replace(/\s+/g, ' ').trim();
+    if(alias.length < 2){
+      msg.className = 'publish-msg is-error';
+      msg.textContent = t('lb.aliasTooShort');
+      aliasEl.focus();
+      return;
+    }
+
+    lsSet(ALIAS_KEY, alias);
+    lsSet(COUNTRY_KEY, countryEl.value);
+
+    btn.disabled = true;
+    msg.className = 'publish-msg';
+    msg.textContent = t('lb.publishing');
+
+    lbFetch('/api/score', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        alias: alias,
+        country: countryEl.value,
+        score: state.finalScore,
+        genres: state.resultStats.genresUsedCount,
+        attendance: state.resultStats.totalAttendance,
+        lineup: state.lineup.map(function(a){ return a.name; }),
+        clientId: clientId()
+      })
+    }).then(function(res){
+      trackEvent('score-published');
+      msg.textContent = '';
+      var box = document.getElementById('publishBox');
+      if(box) box.hidden = true;
+      var rankMsg = document.getElementById('lbPublishedMsg');
+      if(rankMsg && res.rank){
+        rankMsg.textContent = t('lb.publishedRank').replace('{rank}', res.rank).replace('{total}', res.total);
+        rankMsg.hidden = false;
+      }
+    }).catch(function(err){
+      btn.disabled = false;
+      msg.className = 'publish-msg is-error';
+      var code = err && err.message ? err.message : '';
+      if(code === 'alias_rejected') msg.textContent = t('lb.aliasRejected');
+      else if(code === 'rate_limited') msg.textContent = t('lb.rateLimited');
+      else msg.textContent = t('lb.publishError');
+    });
+  }
+
+  /* --- render --- */
+
+  function relTime(iso){
+    var then = Date.parse(iso);
+    if(!then) return '';
+    var mins = Math.max(0, Math.round((Date.now() - then) / 60000));
+    if(mins < 1) return t('lb.justNow');
+    if(mins < 60) return t('lb.minsAgo').replace('{n}', mins);
+    var hours = Math.round(mins / 60);
+    if(hours < 24) return t('lb.hoursAgo').replace('{n}', hours);
+    var days = Math.round(hours / 24);
+    if(days <= 1) return t('lb.yesterday');
+    return t('lb.daysAgo').replace('{n}', days);
+  }
+
+  function untilReset(iso){
+    var ms = Date.parse(iso) - Date.now();
+    if(!(ms > 0)) return '';
+    var hours = Math.floor(ms / 3600000);
+    var days = Math.floor(hours / 24);
+    if(days > 0) return t('lb.resetsInDays').replace('{d}', days).replace('{h}', hours % 24);
+    return t('lb.resetsInHours').replace('{h}', Math.max(1, hours));
+  }
+
+  function lbRowMarkup(row, isMe){
+    var cls = 'lb-row';
+    if(row.rank >= 1 && row.rank <= 3) cls += ' lb-medal-' + row.rank;
+    if(isMe) cls += ' is-me';
+    return '<div class="' + cls + '">' +
+        '<span class="lb-rank">' + row.rank + '</span>' +
+        '<span class="lb-flag" title="' + escapeHtml(countryName(row.country)) + '">' + flagEmoji(row.country) + '</span>' +
+        '<span class="lb-who">' +
+          '<span class="lb-nick">' + escapeHtml(row.alias) +
+            (isMe ? '<span class="lb-you">' + t('lb.you') + '</span>' : '') +
+          '</span>' +
+          '<span class="lb-rowmeta">' + relTime(row.createdAt) + ' · ' +
+            row.genres + ' ' + t('lb.genresShort') + '</span>' +
+        '</span>' +
+        '<span class="lb-pts">' + row.score + '<small>' + t('lb.pts') + '</small></span>' +
+      '</div>';
+  }
+
+  function renderLeaderboard(){
+    var rowsEl = document.getElementById('lbRows');
+    var metaEl = document.getElementById('lbMeta');
+    var pctEl = document.getElementById('lbPercentile');
+    if(!rowsEl) return;
+
+    document.querySelectorAll('.lb-tab').forEach(function(tab){
+      tab.classList.toggle('is-on', tab.getAttribute('data-scope') === lbState.scope);
+    });
+
+    if(pctEl) pctEl.textContent = '';
+    if(metaEl) metaEl.textContent = '';
+
+    if(lbState.loading){
+      rowsEl.innerHTML = '<p class="lb-empty">' + t('lb.loading') + '</p>';
+      return;
+    }
+    if(lbState.error){
+      rowsEl.innerHTML = '<p class="lb-empty">' + t('lb.error') + '</p>';
+      return;
+    }
+    var data = lbState.data;
+    if(!data){ rowsEl.innerHTML = ''; return; }
+
+    if(metaEl){
+      if(lbState.scope === 'week'){
+        metaEl.className = 'lb-meta is-week';
+        metaEl.textContent = '⏳ ' + untilReset(data.resetsAt);
+      } else {
+        metaEl.className = 'lb-meta is-global';
+        var totalKey = data.total === 1 ? 'lb.totalCartelesOne' : 'lb.totalCarteles';
+        metaEl.textContent = '🌍 ' + t(totalKey).replace('{n}', fmtNumber(data.total));
+      }
+    }
+
+    var mine = data.me;
+    var top = data.top || [];
+    if(!top.length){
+      rowsEl.innerHTML = '<p class="lb-empty">' + t('lb.empty') + '</p>';
+      return;
+    }
+
+    var inTop = mine && top.some(function(r){ return r.clientId === mine.clientId; });
+    var html = top.map(function(row){
+      return lbRowMarkup(row, !!(mine && row.clientId === mine.clientId));
+    }).join('');
+
+    if(mine && !inTop){
+      html += '<div class="lb-gap">• • •</div>' + lbRowMarkup(mine, true);
+    }
+    rowsEl.innerHTML = html;
+
+    // El percentil solo se muestra cuando dice algo: con pocos jugadores, o
+    // estando en la mitad de abajo, "top 100%" desmotiva mas que motiva.
+    if(pctEl && mine && mine.percentile && data.total >= 10 && mine.percentile <= 50){
+      pctEl.innerHTML = t('lb.topPercent')
+        .replace('{p}', '<b>' + mine.percentile + '%</b>')
+        .replace('{n}', fmtNumber(data.total));
+    }
+  }
+
+  function showLeaderboard(fromScreenId){
+    lbState.returnTo = fromScreenId || 'screen-landing';
+    showScreen('screen-leaderboard');
+    loadLeaderboard(lbState.scope);
+  }
+
+  // Prepara el bloque de publicar de la pantalla de resultado.
+  function refreshPublishBox(){
+    var box = document.getElementById('publishBox');
+    if(!box) return;
+    if(!lbEnabled()){ box.hidden = true; return; }
+    box.hidden = false;
+    var btn = document.getElementById('publishBtn');
+    if(btn) btn.disabled = false;
+    var msg = document.getElementById('publishMsg');
+    if(msg){ msg.textContent = ''; msg.className = 'publish-msg'; }
+    var published = document.getElementById('lbPublishedMsg');
+    if(published){ published.hidden = true; published.textContent = ''; }
+    var aliasEl = document.getElementById('aliasInput');
+    if(aliasEl && !aliasEl.value) aliasEl.value = lsGet(ALIAS_KEY) || '';
+    fillCountrySelect();
+    var sel = document.getElementById('countrySelect');
+    if(sel) sel.value = detectCountry();
+  }
+
+  // Muestra u oculta las entradas a la clasificacion segun haya API o no.
+  function applyLeaderboardVisibility(){
+    var on = lbEnabled();
+    ['heroLeaderboardBtn', 'resultLeaderboardBtn'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el) el.hidden = !on;
+    });
+  }
+
   /* ---------- events ---------- */
   document.getElementById('startBtn').addEventListener('click', startGame);
   document.getElementById('playAgainBtn').addEventListener('click', startGame);
+
+  (function initLeaderboardEvents(){
+    var hero = document.getElementById('heroLeaderboardBtn');
+    if(hero) hero.addEventListener('click', function(){ showLeaderboard('screen-landing'); });
+
+    var fromResult = document.getElementById('resultLeaderboardBtn');
+    if(fromResult) fromResult.addEventListener('click', function(){ showLeaderboard('screen-result'); });
+
+    var back = document.getElementById('lbBackBtn');
+    if(back) back.addEventListener('click', function(){ showScreen(lbState.returnTo); });
+
+    var play = document.getElementById('lbPlayBtn');
+    if(play) play.addEventListener('click', startGame);
+
+    document.querySelectorAll('.lb-tab').forEach(function(tab){
+      tab.addEventListener('click', function(){
+        var scope = tab.getAttribute('data-scope');
+        if(scope === lbState.scope && lbState.data) return;
+        lbState.data = null;
+        loadLeaderboard(scope);
+      });
+    });
+
+    var publish = document.getElementById('publishBtn');
+    if(publish) publish.addEventListener('click', submitScore);
+
+    var aliasEl = document.getElementById('aliasInput');
+    if(aliasEl){
+      aliasEl.addEventListener('keydown', function(e){
+        if(e.key === 'Enter'){ e.preventDefault(); submitScore(); }
+      });
+    }
+
+    applyLeaderboardVisibility();
+  })();
 
   /* En movil el lineup es una barra inferior plegable (ver CSS ≤767px).
      En pantallas mayores la clase 'open' no pinta nada. */
@@ -1604,6 +2025,12 @@
     document.querySelectorAll('[data-i18n-alt]').forEach(function(el){
       el.setAttribute('alt', t(el.getAttribute('data-i18n-alt')));
     });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+      el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+    });
+    document.querySelectorAll('[data-i18n-aria]').forEach(function(el){
+      el.setAttribute('aria-label', t(el.getAttribute('data-i18n-aria')));
+    });
 
     var toggleLabel = currentLang === 'es' ? 'EN' : 'ES';
     document.querySelectorAll('[data-lang-toggle]').forEach(function(btn){ btn.textContent = toggleLabel; });
@@ -1625,6 +2052,12 @@
       refreshResultTexts();
       generatePoster();
     }
+
+    // La clasificacion se repinta en el idioma nuevo (nombres de pais,
+    // tiempos relativos) sin volver a pedir datos al servidor.
+    fillCountrySelect();
+    var lbScreen = document.getElementById('screen-leaderboard');
+    if(lbScreen && lbScreen.classList.contains('active')) renderLeaderboard();
   }
 
   function setLang(lang){

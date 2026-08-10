@@ -449,6 +449,126 @@
   @media (max-width:500px){ .poster-preview-actions{ flex-direction:column; } }
   .poster-preview-actions .btn{ text-align:center; text-decoration:none; }
 
+  /* ---------- PUBLISH BOX (result screen) ---------- */
+  .publish-box{
+    background: linear-gradient(160deg, rgba(0,229,199,0.10), rgba(21,18,31,0.9));
+    border:1px solid rgba(0,229,199,0.4); border-radius: var(--radius);
+    padding:14px; margin-bottom:16px; text-align:left;
+  }
+  .publish-box[hidden]{ display:none; }
+  .publish-head{ display:flex; align-items:center; gap:8px; margin-bottom:11px; }
+  .publish-icon{ font-size:17px; }
+  .publish-title{ font-size:14px; font-weight:700; }
+  .publish-row{ display:flex; gap:8px; margin-bottom:10px; }
+  .publish-input, .publish-select{
+    background: var(--bg-panel); border:1px solid var(--line); border-radius:10px;
+    padding:11px 12px; color: var(--text);
+    font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:600;
+  }
+  .publish-input{ flex:1; min-width:0; }
+  .publish-select{ width:150px; flex-shrink:0; cursor:pointer; }
+  .publish-input:focus, .publish-select:focus{
+    outline:none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,229,199,0.14);
+  }
+  .publish-input::placeholder{ color: var(--muted); font-weight:400; }
+  .publish-msg{
+    font-family:'JetBrains Mono', monospace; font-size:11px; color: var(--muted);
+    margin:9px 0 0; min-height:1px;
+  }
+  .publish-msg.is-error{ color:#FF7A7A; }
+  .publish-done{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--cyan);
+    text-align:center; margin:0 0 16px;
+  }
+  .publish-done[hidden]{ display:none; }
+  .hero-lb-link{
+    background:none; border:none; cursor:pointer; display:block; width:100%;
+    color: var(--muted); font-family:'Space Grotesk', sans-serif; font-size:13px;
+    text-decoration:underline; padding:14px 0 0;
+  }
+  .hero-lb-link:hover{ color: var(--text); }
+  .hero-lb-link[hidden]{ display:none; }
+
+  /* ---------- LEADERBOARD SCREEN ---------- */
+  .lb-wrap{ max-width: 720px; margin:0 auto; padding: 30px 20px 40px; }
+  .lb-title{
+    font-family:'Anton', sans-serif; font-weight:400; font-size: clamp(32px, 6vw, 46px);
+    text-align:center; margin:0 0 4px;
+  }
+  .lb-subtitle{
+    font-family:'JetBrains Mono', monospace; font-size:11px; letter-spacing:0.16em;
+    color: var(--muted); text-align:center; margin:0 0 20px;
+  }
+  .lb-tabs{
+    display:grid; grid-template-columns:1fr 1fr; gap:6px;
+    background: var(--bg-panel); border:1px solid var(--line);
+    border-radius:999px; padding:4px; margin-bottom:14px;
+  }
+  .lb-tab{
+    font-family:'JetBrains Mono', monospace; font-size:11px; font-weight:700; letter-spacing:0.06em;
+    padding:10px 0; border:none; border-radius:999px; cursor:pointer;
+    background:none; color: var(--muted); transition: color .15s ease;
+  }
+  .lb-tab:hover{ color: var(--text); }
+  .lb-tab.is-on{ background: linear-gradient(100deg, var(--pink), var(--gold)); color:#0B0A14; }
+  .lb-meta{
+    font-family:'JetBrains Mono', monospace; font-size:10px; text-align:center;
+    border-radius:999px; padding:6px 13px; margin:0 auto 14px; width:fit-content;
+  }
+  .lb-meta.is-week{ color: var(--gold); background: rgba(255,184,0,0.09); border:1px solid rgba(255,184,0,0.28); }
+  .lb-meta.is-global{ color: var(--cyan); background: rgba(0,229,199,0.08); border:1px solid rgba(0,229,199,0.28); }
+  .lb-meta:empty{ display:none; }
+
+  .lb-rows{ display:flex; flex-direction:column; gap:7px; }
+  .lb-row{
+    display:flex; align-items:center; gap:12px;
+    background: rgba(21,18,31,0.8); border:1px solid rgba(255,255,255,0.07);
+    border-radius:11px; padding:11px 13px;
+  }
+  .lb-row.is-me{ border-color: var(--cyan); background: rgba(0,229,199,0.07); }
+  .lb-rank{
+    font-family:'JetBrains Mono', monospace; font-size:13px; font-weight:700;
+    color: var(--muted); width:32px; flex-shrink:0; text-align:center;
+  }
+  .lb-medal-1 .lb-rank{ color: var(--gold); font-size:16px; }
+  .lb-medal-2 .lb-rank{ color:#D8D3E0; font-size:15px; }
+  .lb-medal-3 .lb-rank{ color:#C08552; font-size:15px; }
+  .lb-flag{ font-size:17px; width:23px; text-align:center; flex-shrink:0; }
+  .lb-who{ flex:1; min-width:0; }
+  .lb-nick{
+    display:block; font-size:15px; font-weight:700; line-height:1.2;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .lb-you{
+    font-family:'JetBrains Mono', monospace; font-size:8px; background: var(--cyan);
+    color:#08060E; padding:2px 5px; border-radius:4px; margin-left:7px; vertical-align:middle;
+  }
+  .lb-rowmeta{
+    display:block; font-family:'JetBrains Mono', monospace; font-size:9px;
+    color: var(--muted); margin-top:3px; text-transform:uppercase;
+  }
+  .lb-pts{
+    font-family:'JetBrains Mono', monospace; font-size:19px; font-weight:700;
+    color: var(--gold); flex-shrink:0; text-align:right;
+  }
+  .lb-pts small{ display:block; font-size:9px; color: var(--muted); font-weight:400; margin-top:-2px; }
+  .lb-gap{
+    text-align:center; font-family:'JetBrains Mono', monospace;
+    color: var(--line); font-size:16px; letter-spacing:4px; padding:2px 0;
+  }
+  .lb-empty{
+    font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--muted);
+    text-align:center; padding:28px 10px; margin:0;
+  }
+  .lb-percentile{
+    font-family:'JetBrains Mono', monospace; font-size:11px; color: var(--muted);
+    text-align:center; margin:14px 0 0;
+  }
+  .lb-percentile b{ color: var(--cyan); }
+  .lb-percentile:empty{ display:none; }
+  .lb-actions{ display:flex; gap:10px; margin-top:22px; }
+  .lb-actions .btn{ flex:1; }
+
   .copied-msg{ font-size:12px; color: var(--cyan); text-align:center; margin-top:8px; font-family:'JetBrains Mono', monospace; display:none; }
   .copied-msg.show{ display:block; }
 
@@ -778,6 +898,47 @@
     .poster-preview-actions{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
     .poster-preview-actions .btn{ padding:12px 8px; font-size:13px; }
     #posterDownloadLink, #suggestionLink{ grid-column:1 / -1; }
+
+    /* ---- bloque de publicar ---- */
+    /* En movil va al final: el poster y los botones de descargar/compartir
+       son lo primero que se quiere ver al acabar, y el bloque mide ~160px.
+       En escritorio se queda antes del poster (hay sitio de sobra). */
+    #screen-result .wrap{ display:flex; flex-direction:column; }
+    .publish-box, .publish-done{ order:1; }
+    .publish-box{ margin: 4px 0 0; }
+    .publish-done{ margin: 10px 0 0; }
+    .publish-box{ padding:12px; }
+    .publish-head{ margin-bottom:9px; }
+    .publish-title{ font-size:12.5px; }
+    .publish-icon{ font-size:15px; }
+    .publish-row{ gap:7px; margin-bottom:8px; }
+    .publish-input, .publish-select{ padding:10px 11px; font-size:13.5px; }
+    .publish-select{ width:108px; }
+    .publish-box .btn{ padding:11px 8px; font-size:13px; }
+    .publish-msg{ font-size:10px; margin-top:7px; }
+    .publish-done{ font-size:11px; margin-bottom:12px; }
+    .hero-lb-link{ font-size:12px; padding-top:12px; }
+
+    /* ---- clasificación ---- */
+    .lb-wrap{ padding:16px 14px 22px; }
+    .lb-title{ font-size:27px; }
+    .lb-subtitle{ font-size:9.5px; margin-bottom:14px; }
+    .lb-tabs{ margin-bottom:12px; }
+    .lb-tab{ font-size:10.5px; padding:8px 0; }
+    .lb-meta{ font-size:9px; padding:5px 11px; margin-bottom:12px; }
+    .lb-rows{ gap:6px; }
+    .lb-row{ padding:9px 11px; gap:10px; }
+    .lb-rank{ width:26px; font-size:12px; }
+    .lb-medal-1 .lb-rank{ font-size:15px; }
+    .lb-medal-2 .lb-rank, .lb-medal-3 .lb-rank{ font-size:14px; }
+    .lb-flag{ font-size:15px; width:20px; }
+    .lb-nick{ font-size:13.5px; }
+    .lb-rowmeta{ font-size:8.5px; margin-top:2px; }
+    .lb-pts{ font-size:16px; }
+    .lb-pts small{ font-size:8.5px; }
+    .lb-percentile{ font-size:9.5px; margin-top:11px; }
+    .lb-actions{ flex-direction:column; gap:8px; margin-top:16px; }
+    .lb-actions .btn{ padding:12px 8px; font-size:13px; }
   }
 
   /* Moviles bajos (iPhone SE, Androids de 640-700px): en un evento de decision

@@ -24,6 +24,8 @@
 <meta name="twitter:image" content="https://armatucartel.com/images/og-image.jpg">
 
 <meta name="theme-color" content="#0B0A14">
+<!-- URL del Worker de la clasificación. Vacío = clasificación desactivada. -->
+<meta name="atc-api-base" content="https://arma-tu-cartel-api.djara.workers.dev">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AA%3C/text%3E%3C/svg%3E">
 
 <link rel="stylesheet" href="css/styles.css">
@@ -67,6 +69,7 @@
         </div>
 
         <button class="btn-hero-pill" id="startBtn"><span data-i18n="landing.startBtn">Empezar a jugar</span> <span class="btn-arrow">→</span></button>
+        <button class="hero-lb-link" id="heroLeaderboardBtn" hidden data-i18n="lb.viewBtn">🏆 Ver clasificación</button>
       </div>
 
       <p class="hero-disclaimer" data-i18n="landing.disclaimer">Juego de fans con fines de entretenimiento, sin relación oficial con los artistas, sus representantes o discográficas. Los datos de sueldo, aforo y directo son ficticios y solo sirven para la mecánica del juego. Las imágenes son ilustraciones generadas por IA, no fotografías reales. Nombres e imágenes pertenecen a sus respectivos propietarios.</p>
@@ -167,14 +170,52 @@
 
       <div class="attr-panel" id="attrPanel"></div>
 
+      <div class="publish-box" id="publishBox" hidden>
+        <div class="publish-head">
+          <span class="publish-icon" aria-hidden="true">🌍</span>
+          <span class="publish-title" data-i18n="lb.publishTitle">Publica tu puntuación</span>
+        </div>
+        <div class="publish-row">
+          <input class="publish-input" id="aliasInput" type="text" maxlength="16" spellcheck="false"
+                 autocomplete="nickname" data-i18n-placeholder="lb.aliasPlaceholder" placeholder="Tu alias">
+          <select class="publish-select" id="countrySelect" data-i18n-aria="lb.countryLabel" aria-label="País"></select>
+        </div>
+        <button class="btn btn-gold" id="publishBtn" data-i18n="lb.publishBtn">Publicar en la clasificación</button>
+        <p class="publish-msg" id="publishMsg" role="status"></p>
+      </div>
+      <p class="publish-done" id="lbPublishedMsg" role="status" hidden></p>
+
       <div class="poster-preview" id="posterPreviewBox">
         <img id="posterImg" alt="Póster de tu cartel" data-i18n-alt="result.posterAlt">
         <div class="poster-preview-actions">
           <a class="btn btn-gold" id="posterDownloadLink" download="mi-cartel.png" data-i18n="result.downloadBtn">⬇️ Descargar imagen</a>
           <button class="btn btn-secondary" id="posterShareBtn" style="display:none" data-i18n="result.shareBtn">📲 Compartir imagen</button>
           <button class="btn btn-secondary" id="playAgainBtn" data-i18n="result.playAgainBtn">🔄 Jugar de nuevo</button>
+          <button class="btn btn-secondary" id="resultLeaderboardBtn" hidden data-i18n="lb.viewBtn">🏆 Ver clasificación</button>
           <a class="btn btn-secondary" id="suggestionLink" href="mailto:armatucartel@gmail.com?subject=Sugerencia%20-%20Arma%20tu%20Cartel" data-i18n="result.suggestionBtn">📧 Enviar sugerencia</a>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="screen-leaderboard" class="screen">
+    <button class="lang-toggle lang-toggle-floating" data-lang-toggle aria-label="Change language / Cambiar idioma">EN</button>
+    <div class="lb-wrap">
+      <h1 class="lb-title" data-i18n="lb.title">Clasificación</h1>
+      <p class="lb-subtitle" data-i18n="lb.subtitle">LOS MEJORES CARTELES</p>
+
+      <div class="lb-tabs" role="tablist">
+        <button class="lb-tab is-on" data-scope="week" role="tab" data-i18n="lb.tabWeek">ESTA SEMANA</button>
+        <button class="lb-tab" data-scope="global" role="tab" data-i18n="lb.tabGlobal">GLOBAL</button>
+      </div>
+
+      <div class="lb-meta" id="lbMeta"></div>
+      <div class="lb-rows" id="lbRows"></div>
+      <p class="lb-percentile" id="lbPercentile"></p>
+
+      <div class="lb-actions">
+        <button class="btn btn-gold" id="lbPlayBtn" data-i18n="lb.playBtn">🎪 Jugar una partida</button>
+        <button class="btn btn-secondary" id="lbBackBtn" data-i18n="lb.backBtn">Volver</button>
       </div>
     </div>
   </div>
