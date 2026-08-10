@@ -238,9 +238,12 @@
   .choice-grid{
     display:grid; grid-template-columns: repeat(3, 1fr); gap:18px;
   }
-  @media (max-width: 900px){ .choice-grid{ grid-template-columns: 1fr; max-width: 420px; margin:0 auto; } }
+  /* La tablet mantiene las 3 columnas (como escritorio); solo el movil apila. */
+  @media (max-width: 767px){ .choice-grid{ grid-template-columns: 1fr; max-width: 420px; margin:0 auto; } }
 
   .choice-card{
+    --choice-photo-h: clamp(140px, 30vh, 260px);
+    position: relative;
     background: rgba(21,18,31,0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
     border:1px solid rgba(255,255,255,0.08); border-radius: var(--radius);
     cursor:pointer; overflow:hidden;
@@ -253,7 +256,7 @@
   .choice-card:focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
 
   .choice-photo{
-    position:relative; width:100%; height: clamp(140px, 30vh, 260px); overflow:hidden;
+    position:relative; width:100%; height: var(--choice-photo-h); overflow:hidden;
     background-size: cover; background-position: center 18%;
   }
   .choice-icon-wrap{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
@@ -263,8 +266,10 @@
   /* ---------- SYNC FLICKER (round transition) ---------- */
   .choice-card:disabled{ cursor:default; }
   .choice-card:disabled:hover{ transform:none; border-color: rgba(255,255,255,0.08); background: rgba(21,18,31,0.72); }
+  /* Cubre exactamente la caja de la foto (que empieza en el borde superior de la tarjeta). */
   .choice-name-overlay{
-    position:absolute; left:0; right:0; bottom:0;
+    position:absolute; left:0; right:0; top:0; height: var(--choice-photo-h);
+    display:flex; align-items:flex-end;
     padding: 46px 16px 12px;
     background: linear-gradient(180deg, transparent, rgba(11,10,20,0.95) 85%);
   }
@@ -587,4 +592,201 @@
   @media (max-height: 640px){
     .sim-event-hint{ display:none; }
     .sim-card-name-overlay{ padding: 24px 16px 10px; }
+  }
+
+  /* ================================================================
+     TABLET (768–1100px)
+     Igual que escritorio, pero sin columnas fijas laterales: no caben.
+     Las notificaciones, ocultas hasta ahora en este rango, vuelven como
+     tira horizontal bajo las tarjetas.
+     ================================================================ */
+  @media (min-width: 768px) and (max-width: 1100px){
+    .notif-panel{
+      display:flex; flex-direction:row; position:static;
+      width:100%; max-width:840px; margin:18px auto 0; padding:0 20px;
+      gap:10px; overflow-x:auto;
+    }
+    .notif-card{ flex:0 0 250px; }
+  }
+
+  /* ================================================================
+     MÓVIL (≤767px)
+     Rediseño completo: ver mockups aprobados. Sin notificaciones.
+     ================================================================ */
+  @media (max-width: 767px){
+
+    /* ---- 1. INICIO ---- */
+    h1.title{ font-size:40px; margin-bottom:18px; }
+    .hero-collage{ margin: 6px 0 12px; }
+    .hero-collage-photo, .hero-collage-more{
+      width:64px; height:64px; margin-left:-16px; border-width:2.5px;
+    }
+    /* Solo 4 caras + el contador: 8 fotos ocupan 3 filas en movil */
+    .hero-collage-photo:nth-child(n+5){ display:none; }
+    .hero-collage-photo:nth-child(odd){ transform: translateY(-7px); }
+    .hero-collage-photo:nth-child(even){ transform: translateY(7px); }
+    .hero-collage-more{ font-size:13px; border-width:2px; }
+    .hero-collage-caption{ font-size:11px; margin-bottom:22px; }
+    .hero-steps{ gap:9px; margin-bottom:24px; }
+    .hero-step{ padding:11px 13px; gap:11px; }
+    .hero-step-icon{ font-size:19px; }
+    .hero-step-title{ font-size:12.5px; }
+    .hero-step-body{ font-size:10.5px; line-height:1.4; }
+    .btn-hero-pill{ width:100%; padding:15px 0; }
+    .hero-disclaimer{ font-size:9px; margin-top:14px; padding-bottom:16px; }
+
+    /* ---- 2. ELEGIR ARTISTA ---- */
+    /* El boton de idioma es fixed arriba a la derecha: reservamos su hueco
+       para que presupuesto y ronda no queden debajo. */
+    .topbar-inner{ padding:9px 60px 9px 14px; }
+
+    /* En las pantallas con topbar, el boton deja de parecer un elemento
+       flotante y se alinea como un pill mas de la barra: misma altura,
+       mismo borde superior y mismo margen derecho que el resto. */
+    #screen-game .lang-toggle-floating,
+    #screen-simulation .lang-toggle-floating{
+      top:10px; right:14px;
+      padding:4px 9px; font-size:10.5px;
+      background: var(--bg-panel); backdrop-filter:none; -webkit-backdrop-filter:none;
+    }
+    .topbar-brand span{ display:none; }   /* deja solo el emoji */
+    .topbar-brand{ font-size:17px; }
+    .topbar-budget{ font-size:10.5px; padding:4px 8px; }
+    .topbar-round{ font-size:10.5px; padding:4px 8px; }
+    .topbar-right{ gap:8px; }
+    /* "Concierto 10 / 10" no cabe junto al presupuesto y el boton de idioma:
+       .topbar-inner haria wrap y la barra pasaria a dos filas. En movil se
+       queda solo el contador; la palabra la da el contexto y la barra de
+       progreso de debajo. */
+    .topbar-round span[data-i18n]{ display:none; }
+
+    .game-body{
+      padding:14px 14px 104px;            /* hueco para la barra inferior */
+      align-items:flex-start;
+    }
+    .section-title{ font-size:25px; margin-bottom:13px; }
+    .choice-grid{ max-width:none; gap:10px; }
+
+    /* Tarjeta en horizontal: foto a la izquierda, datos a la derecha.
+       Las 3 caben a la vez, que es lo que permite compararlas. */
+    .choice-card{
+      --choice-photo-h: 112px;
+      flex-direction:row; gap:11px; padding:9px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.3);
+    }
+    .choice-card:hover{ transform:none; }
+    .choice-photo{ width:112px; flex-shrink:0; border-radius:10px; }
+    .choice-body{
+      flex:1; min-width:0; display:flex; flex-direction:column; justify-content:center; gap:2px;
+    }
+    .choice-name-overlay{
+      position:static; height:auto; display:block;
+      padding:0; background:none;
+    }
+    .choice-name{ font-size:15px; text-shadow:none; }
+    .choice-tags{ padding:4px 0 6px; gap:5px; }
+    .tag-pill{ font-size:8.5px; padding:2.5px 7px; }
+    .flag-icon{ width:13px; height:9px; }
+    .choice-stats{ padding:0; }
+    .choice-stats .stat-row-plain{ margin-bottom:3px; }
+    .choice-stats .stat-row{ margin-bottom:0; }
+    .choice-stats .stat-label{ font-size:8.5px; }
+    .choice-stats .stat-plain-val{ font-size:11px; }
+
+    /* Lineup: de columna lateral a barra inferior fija y plegable.
+       Plegada muestra solo las caras fichadas; al tocarla se abre la lista. */
+    .game-sidebar{
+      position:fixed; left:0; right:0; bottom:0; top:auto;
+      width:100%; max-width:none; margin:0; z-index:30;
+      border-radius:16px 16px 0 0; border-left:none; border-right:none; border-bottom:none;
+      background:rgba(15,12,25,0.97);
+      padding:10px 14px calc(10px + env(safe-area-inset-bottom, 0px));
+    }
+    .sidebar-head{
+      margin-bottom:0; font-size:13px; cursor:pointer;
+      display:flex; align-items:center; gap:8px;
+    }
+    .sidebar-head::after{
+      content:'▲'; margin-left:auto; font-size:10px; color:var(--muted);
+      transition: transform .25s ease;
+    }
+    .game-sidebar.open .sidebar-head::after{ transform: rotate(180deg); }
+
+    .sidebar-list{ max-height:none; margin-top:8px; }
+    /* Plegada: tira horizontal de caras */
+    .game-sidebar:not(.open) .sidebar-list{
+      flex-direction:row; gap:6px; overflow-x:auto; padding-bottom:2px;
+    }
+    .game-sidebar:not(.open) .sidebar-item{
+      padding:0; background:none; border:none; flex-shrink:0;
+    }
+    .game-sidebar:not(.open) .sidebar-text,
+    .game-sidebar:not(.open) .sidebar-check{ display:none; }
+    .game-sidebar:not(.open) .avatar-sm{ width:34px; height:34px; border-radius:9px; }
+    /* Desplegada: lista completa con scroll propio */
+    .game-sidebar.open .sidebar-list{ max-height:44vh; overflow-y:auto; }
+
+    /* ---- 3. SIMULACIÓN ---- */
+    .sim-body{ padding:13px 14px 14px; justify-content:flex-start; }
+    .sim-live-badge{ font-size:9.5px; padding:5px 12px; margin-bottom:11px; }
+    .sim-timeline{ gap:4px; margin-bottom:13px; width:100%; flex-wrap:nowrap; }
+    /* Los circulos numerados no se leen a este ancho: pasan a segmentos */
+    .sim-dot{ flex:1; width:auto; height:5px; border-radius:3px; font-size:0; }
+    .sim-dot.current{ width:auto; height:5px; box-shadow:none; }
+    .sim-card{ max-width:none; margin-bottom:12px; }
+    /* Las fotos son casi cuadradas (261x281): una caja muy apaisada obliga a
+       'cover' a recortar mas de la mitad de la altura y se ve con mucho zoom.
+       ~260px deja visible ~70%, en linea con el recorte de escritorio; en
+       moviles bajos cede altura para que los botones de decision no caigan
+       por debajo del pliegue. */
+    .sim-card-photo{ height: clamp(190px, 32vh, 268px); }
+    .sim-card-name{ font-size:23px; }
+    .sim-card-tags{ padding:8px 14px 12px; }
+    .sim-hype-panel{ padding:12px 13px; margin-bottom:11px; }
+    .sim-event-card{ margin-bottom:11px; }
+    .sim-event-actions .btn{ font-size:11.5px; padding:10px 6px; }
+    /* En flujo con margin-top:auto: baja solo al fondo cuando sobra sitio, y
+       cuando el evento es de decision (tarjeta alta) se aparta en vez de
+       quedar flotando encima de los botones de opcion. */
+    .sim-skip{
+      position:static; align-self:stretch; width:100%;
+      margin-top:auto; padding:12px; font-size:13px;
+    }
+
+    /* ---- 4. RESULTADO ---- */
+    .wrap{ padding:14px 16px 16px; }
+    #screen-result h1.title{ margin-bottom:8px; }
+    .score-ring-wrap{ width:132px; height:132px; margin-top:6px; }
+    .score-ring-track, .score-ring-fill{ stroke-width:11; }
+    .score-ring-value{ font-size:40px; }
+    .score-ring-of100{ font-size:10px; }
+    .result-label{ font-size:11.5px; margin:8px 0 2px; }
+    .record-line{ font-size:10.5px; margin-bottom:10px; }
+
+    /* Atributos en rejilla: las dos filas con barra ocupan el ancho completo */
+    .attr-panel{
+      display:grid; grid-template-columns:1fr 1fr; gap:7px 12px; padding:10px 12px; margin-bottom:10px;
+    }
+    .attr-panel .stat-row{ grid-column:1 / -1; margin-bottom:0; }
+    .attr-panel .stat-row-plain{ margin-bottom:0; flex-direction:column; align-items:flex-start; gap:1px; }
+    .attr-panel .stat-row-plain:last-child{ grid-column:1 / -1; }
+    .attr-panel .stat-label{ font-size:8.5px; width:auto; }
+    .attr-panel .stat-plain-val{ font-size:13px; }
+
+    .poster-preview{ margin-top:0; }
+    .poster-preview img{ margin-bottom:9px; }
+    .poster-preview-actions{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .poster-preview-actions .btn{ padding:12px 8px; font-size:13px; }
+    #posterDownloadLink, #suggestionLink{ grid-column:1 / -1; }
+  }
+
+  /* Moviles bajos (iPhone SE, Androids de 640-700px): en un evento de decision
+     los botones de opcion caen bajo el pliegue. Se recorta lo prescindible
+     para que la eleccion quede siempre visible sin hacer scroll. */
+  @media (max-width: 767px) and (max-height: 700px){
+    .sim-live-badge{ display:none; }
+    .sim-card{ margin-bottom:9px; }
+    .sim-card-tags{ padding:6px 12px 8px; }
+    .sim-hype-panel{ padding:10px 12px; margin-bottom:9px; }
+    .sim-event-card{ margin-bottom:9px; }
   }

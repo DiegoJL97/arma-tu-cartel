@@ -53,6 +53,32 @@ Orden aproximado en el fichero:
 
 Para añadir un texto nuevo: añadir la clave a ambos bloques de `TRANSLATIONS`, y usar `data-i18n` en el HTML estático o `t('clave')` en JS.
 
+## Responsive
+
+Tres tramos, definidos al final de `css/styles.css`:
+
+- **Escritorio (>1100px)** — layout original: columnas fijas laterales (notificaciones a la izquierda, lineup a la derecha) y 3 tarjetas en rejilla.
+- **Tablet (768–1100px)** — igual que escritorio pero sin columnas fijas (no caben): el lineup y las notificaciones pasan a bloques estáticos bajo las tarjetas, las notificaciones como tira horizontal. Las tarjetas mantienen las 3 columnas hasta 768px.
+- **Móvil (≤767px)** — rediseño completo:
+  - Inicio: collage recortado a 4 caras + contador (`:nth-child(n+5){display:none}`), pasos compactos, CTA a ancho completo.
+  - Juego: tarjetas en horizontal (foto 112px a la izquierda, datos a la derecha) para que las 3 quepan sin scroll; lineup como barra inferior fija y plegable. **Sin notificaciones** (decisión de Diego: el toast tapaba el título).
+  - Simulación: foto en banda con altura `clamp(190px, 32vh, 268px)`, timeline en segmentos en vez de círculos numerados, botón de saltar en flujo con `margin-top:auto`.
+  - Resultado: anillo de 132px, atributos en rejilla 2×2, botones en rejilla.
+
+Dos detalles estructurales que sostienen esto:
+
+- **`--choice-photo-h`**: variable en `.choice-card` que comparten `.choice-photo` y `.choice-name-overlay`. El nombre del artista vive **fuera** de `.choice-photo` (dentro de `.choice-body`) para poder colocarse a la derecha en móvil; en escritorio se superpone con `position:absolute` cubriendo exactamente la caja de la foto. Si se cambia la altura de la foto hay que hacerlo en esa variable, no en `.choice-photo`.
+- **`.sidebar-text`**: envoltorio del nombre/género en `renderSidebar()`. Existe para que la barra plegada pueda ocultar el texto y dejar solo los avatares sin ocultar también el avatar (que es otro `div` hermano).
+
+Tres trampas del móvil que ya costaron un bug y conviene no repetir:
+
+- **El botón de idioma es `position:fixed`** y en las 4 pantallas está arriba a la derecha (decisión explícita de Diego). En móvil, en juego y simulación, se le da la misma caja que los pills de la topbar (`top:10px`, `padding:4px 9px`, `font-size:10.5px`, fondo sólido sin blur) para que se lea como un elemento más de la barra en vez de algo flotante encima. `.topbar-inner` reserva su hueco con `padding-right:60px`.
+- **La topbar de móvil va justa de ancho**: `.topbar-inner` tiene `gap:12px` además del padding, y `flex-wrap:wrap`, así que en cuanto el contenido se pasa unos pocos px la barra se parte en dos filas (pasó con "Concierto 10 / 10" + presupuesto lleno). Por eso en móvil `.topbar-round` oculta la palabra y deja solo el contador. Al añadir cualquier cosa a esa barra, medir el peor caso: concierto 10/10 con el presupuesto casi agotado.
+- **El botón de saltar simulación no puede ser `position:fixed`**: con un evento de decisión la tarjeta crece y los botones de opción quedaban debajo. Va en flujo con `margin-top:auto`, que lo baja al fondo solo cuando sobra sitio.
+- **Las fotos de artista son casi cuadradas (261×281)**. Cualquier caja apaisada obliga a `background-size:cover` a recortar mucha altura: a 345×212 se veía solo el 57% y parecía un zoom excesivo. De ahí el `clamp` en `.sim-card-photo`.
+
+Medido en navegador real a 375×812: inicio, juego y simulación sin scroll; resultado ~2px. En 375×667 (iPhone SE) los botones de decisión quedan sobre el pliegue, con ~60px de scroll solo para alcanzar el botón de saltar. Existe un bloque `@media (max-width:767px) and (max-height:700px)` que recorta lo prescindible en móviles bajos (oculta el badge de directo, aprieta márgenes).
+
 ## Mecánicas de juego y balance actual
 
 - 10 rondas, elección entre 3 artistas cada ronda.

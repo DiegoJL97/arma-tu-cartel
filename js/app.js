@@ -756,20 +756,24 @@
       iconHtml = '<div class="choice-icon-wrap"><svg class="avatar-icon-lg" viewBox="0 0 64 64">' +
         HEAD + ARCHETYPES[archetypeIndex(artist.name)] + '</svg></div>';
     }
+    // El nombre vive fuera de .choice-photo para que en movil pueda colocarse
+    // a la derecha de la foto; en escritorio se superpone via position:absolute.
     return photoOpen +
         iconHtml +
+      '</div>' +
+      '<div class="choice-body">' +
         '<div class="choice-name-overlay">' +
           '<div class="choice-name">' + artist.name + '</div>' +
         '</div>' +
-      '</div>' +
-      '<div class="choice-tags">' +
-        '<span class="tag-pill tag-genre">' + genreLabel(artist.genre) + '</span>' +
-        '<span class="tag-pill tag-country"><span class="flag-icon">' + countryFlag(artist.country) + '</span>' + artist.country + '</span>' +
-      '</div>' +
-      '<div class="choice-stats">' +
-        plainRow(t('stat.sueldo'), fmtMoney(artist.salary), 'money') +
-        plainRow(t('stat.asistencia'), fmtNumber(artist.attendance), 'attendance') +
-        statRow(t('stat.showEnVivo'), artist.live, 'stat-live') +
+        '<div class="choice-tags">' +
+          '<span class="tag-pill tag-genre">' + genreLabel(artist.genre) + '</span>' +
+          '<span class="tag-pill tag-country"><span class="flag-icon">' + countryFlag(artist.country) + '</span>' + artist.country + '</span>' +
+        '</div>' +
+        '<div class="choice-stats">' +
+          plainRow(t('stat.sueldo'), fmtMoney(artist.salary), 'money') +
+          plainRow(t('stat.asistencia'), fmtNumber(artist.attendance), 'attendance') +
+          statRow(t('stat.showEnVivo'), artist.live, 'stat-live') +
+        '</div>' +
       '</div>';
   }
 
@@ -827,7 +831,7 @@
       row.className = 'sidebar-item';
       row.innerHTML =
         avatarMarkup(artist.name, 'avatar-sm') +
-        '<div>' +
+        '<div class="sidebar-text">' +
           '<div class="sidebar-name">' + artist.name + '</div>' +
           '<div class="sidebar-meta">' + genreLabel(artist.genre) + ' · ' + fmtMoney(artist.salary) + '</div>' +
         '</div>' +
@@ -1342,6 +1346,21 @@
   /* ---------- events ---------- */
   document.getElementById('startBtn').addEventListener('click', startGame);
   document.getElementById('playAgainBtn').addEventListener('click', startGame);
+
+  /* En movil el lineup es una barra inferior plegable (ver CSS ≤767px).
+     En pantallas mayores la clase 'open' no pinta nada. */
+  (function initSidebarToggle(){
+    var sidebar = document.querySelector('.game-sidebar');
+    var head = sidebar && sidebar.querySelector('.sidebar-head');
+    if(!head) return;
+    head.setAttribute('role', 'button');
+    head.setAttribute('tabindex', '0');
+    function toggle(){ sidebar.classList.toggle('open'); }
+    head.addEventListener('click', toggle);
+    head.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
+    });
+  })();
 
   /* ---------- HERO ARTIST COLLAGE ---------- */
   (function initHeroCollage(){
