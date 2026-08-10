@@ -27,7 +27,8 @@
         step2Body: 'Cada show puede salir bien... o torcerse. Tú decides en directo.',
         step3Title: '3. Consigue tu cartel',
         step3Body: 'Descubre tu puntuación y descarga el póster de tu festival.',
-        startBtn: 'Empezar a jugar'
+        startBtn: 'Empezar a jugar',
+        disclaimer: 'Juego de fans con fines de entretenimiento, sin relación oficial con los artistas, sus representantes o discográficas. Los datos de sueldo, aforo y directo son ficticios y solo sirven para la mecánica del juego. Las imágenes son ilustraciones generadas por IA, no fotografías reales. Nombres e imágenes pertenecen a sus respectivos propietarios.'
       },
       game: {
         sectionTitle: 'Elige un artista',
@@ -97,7 +98,8 @@
         step2Body: 'Every show can go great... or go wrong. You decide live.',
         step3Title: '3. Get your lineup',
         step3Body: 'Find out your score and download your festival poster.',
-        startBtn: 'Start playing'
+        startBtn: 'Start playing',
+        disclaimer: 'Fan-made game for entertainment purposes, not affiliated with or endorsed by the artists, their management or record labels. Salary, attendance and live-show figures are fictional and exist only for gameplay. All artwork is AI-generated illustration, not real photography. All names and images belong to their respective owners.'
       },
       game: {
         sectionTitle: 'Pick an artist',

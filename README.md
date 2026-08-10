@@ -67,4 +67,4 @@ Cualquier hosting de ficheros estáticos sirve: sube la carpeta completa (con `i
 
 ## Aviso
 
-Juego de fans hecho con fines de entretenimiento, sin relación oficial con los artistas incluidos. Los datos de sueldo, aforo y valoración de directo son ficticios y sirven únicamente para la mecánica del juego.
+Juego de fans hecho con fines de entretenimiento, sin relación oficial con los artistas incluidos. Los datos de sueldo, aforo y valoración de directo son ficticios y sirven únicamente para la mecánica del juego. Las imágenes de artistas son ilustraciones generadas por IA, no fotografías reales.

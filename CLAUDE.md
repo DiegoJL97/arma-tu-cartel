@@ -70,7 +70,7 @@ Durante la revisión de atributos se verificó (vía búsqueda web) que las recl
 
 Dos scripts jsdom (headless, sin navegador real) en `tests/`, que hay que ejecutar tras cualquier cambio. Requieren Node.js + `npm install` (instala `jsdom`, única devDependency):
 - **`tests/drive_hype.js`** (`npm run test:hype`) — juega 5 partidas completas de principio a fin (elige, simula, resultado, póster), comprueba que no hay errores y que el canvas del póster se genera.
-- **`tests/drive_i18n.js`** (`npm run test:i18n`) — 33 comprobaciones: idioma por defecto, cambio a inglés en cada pantalla, textos traducidos correctamente en juego/simulación/resultado, vuelta a español con refresco en vivo en la pantalla de resultado.
+- **`tests/drive_i18n.js`** (`npm run test:i18n`) — 35 comprobaciones: idioma por defecto, cambio a inglés en cada pantalla, textos traducidos correctamente en juego/simulación/resultado (incluido el aviso legal del landing), vuelta a español con refresco en vivo en la pantalla de resultado.
 - `npm test` ejecuta ambos.
 
 **Aviso importante**: estos tests validan lógica/DOM, no diseño visual real — jsdom no renderiza CSS ni layout de verdad. **En todo el proyecto nunca se ha verificado el aspecto visual en un navegador real.** Antes de un lanzamiento público, hacer una pasada visual en dispositivos/navegadores reales es una tarea pendiente crítica.
@@ -90,7 +90,7 @@ Se valoró cambiar el nombre pero se decidió **mantener "Arma tu Cartel"**. Pun
 - ~~Meta tags Open Graph + favicon + meta description~~ — **hecho**: description, OG, Twitter Card, favicon (emoji 🎪 provisional), theme-color y `og-image.jpg` (1200x630, generado por Canvas a partir de los assets reales) en index.html.
 - ~~Analítica básica y respetuosa con privacidad~~ — **hecho**: GoatCounter (sitio `armatucartel`, sin cookies, sin banner de consentimiento). Script en `index.html`. Eventos custom vía `trackEvent()` en js/app.js: `game-started` (startGame), `game-completed` (showResult), `poster-downloaded` (click en posterDownloadLink).
 - Pasada de QA visual en navegadores/dispositivos reales — **nunca hecha**.
-- Aviso legal dentro de la propia app (ya está en el README, falta dentro del juego) sobre datos ficticios / juego de fans no oficial, dado que usa nombres y fotos reales de artistas.
+- ~~Aviso legal dentro de la propia app~~ — **hecho**: párrafo `.hero-disclaimer` al final de la pantalla de inicio (bajo el botón de empezar), bilingüe vía `landing.disclaimer`. Cubre: juego de fans sin relación oficial con artistas/representantes/discográficas, datos ficticios, imágenes generadas por IA (no fotos reales), y propiedad de nombres e imágenes. Estilo deliberadamente discreto (11px, `--muted`, opacidad 0.75).
 
 **Corto plazo:**
 - Modo "reto diario" (mismo pool de artistas para todos cada día) — la funcionalidad con más potencial viral identificada, estilo Wordle.

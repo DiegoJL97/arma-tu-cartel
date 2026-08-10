@@ -64,6 +64,7 @@ function check(label, cond){
   check('default lang attr = es', doc.documentElement.getAttribute('lang') === 'es');
   check('landing title default ES', doc.querySelector('#screen-landing h1.title').textContent === 'Arma tu Cartel');
   check('start btn default ES', doc.getElementById('startBtn').textContent.indexOf('Empezar a jugar') !== -1);
+  check('disclaimer default ES', doc.querySelector('.hero-disclaimer').textContent.indexOf('Juego de fans con fines de entretenimiento') === 0);
 
   // 2. Toggle to English via the floating landing button
   const landingToggle = doc.querySelector('#screen-landing [data-lang-toggle]');
@@ -74,6 +75,7 @@ function check(label, cond){
   check('landing title EN', doc.querySelector('#screen-landing h1.title').textContent === 'Build Your Lineup');
   check('start btn EN', doc.getElementById('startBtn').textContent.indexOf('Start playing') !== -1);
   check('collage caption EN', doc.getElementById('heroCollageCaption').textContent.indexOf('over 100 real') !== -1);
+  check('disclaimer EN', doc.querySelector('.hero-disclaimer').textContent.indexOf('Fan-made game for entertainment purposes') === 0);
   check('toggle button shows ES (next target)', landingToggle.textContent === 'ES');
   check('localStorage persisted en', window.localStorage.getItem('armaTuCartelLang') === 'en');
 
