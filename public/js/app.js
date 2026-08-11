@@ -923,6 +923,11 @@ import * as Engine from './engine.js';
     var card = document.getElementById('simEventCard');
     var text = L(def.text).replace('{name}', artist.name).replace('{other}', otherName);
     card.className = 'sim-event-card decision';
+    // En movil el boton de saltar es fixed salvo mientras hay opciones de
+    // decision visibles (ver .sim-skip en styles.css): con esta clase vuelve
+    // al flujo normal para no taparlas.
+    var simBodyEl = document.querySelector('.sim-body');
+    if(simBodyEl) simBodyEl.classList.add('has-decision');
     var optionsHtml = def.options.map(function(opt, i){
       return '<button class="btn btn-secondary sim-event-option" data-index="' + i + '">' + L(opt.label) + '</button>';
     }).join('');
@@ -943,6 +948,7 @@ import * as Engine from './engine.js';
         var totalDelta = baseDelta + opt.delta;
         simApplyHypeDelta(totalDelta);
         card.querySelectorAll('.sim-event-option').forEach(function(b){ b.disabled = true; });
+        if(simBodyEl) simBodyEl.classList.remove('has-decision');
         card.className = 'sim-event-card ' + (totalDelta >= 0 ? 'positive' : 'negative');
         var resultText = L(opt.resultText);
         card.innerHTML =
@@ -979,6 +985,8 @@ import * as Engine from './engine.js';
     var eventCard = document.getElementById('simEventCard');
     eventCard.className = 'sim-event-card';
     eventCard.innerHTML = '';
+    var simBodyResetEl = document.querySelector('.sim-body');
+    if(simBodyResetEl) simBodyResetEl.classList.remove('has-decision');
     var deltaEl = document.getElementById('simHypeDelta');
     deltaEl.textContent = '';
     deltaEl.className = 'sim-hype-delta';

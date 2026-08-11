@@ -68,7 +68,7 @@ Orden aproximado en el fichero:
 - Textos estáticos del HTML usan `data-i18n="clave"` (y `data-i18n-alt` para atributos `alt`); `applyLanguage()` recorre el DOM y los traduce sin recargar la página.
 - Textos que se generan dinámicamente con datos aleatorios (`SIM_EVENTS`, `NOTIF_MESSAGES`) no usan `data-i18n`: son objetos `{es, en}` resueltos en el momento con el helper `L()`.
 - El género de cada artista se muestra traducido vía `genreLabel()` / `GENRE_LABELS`, pero el valor guardado en `ARTISTS` sigue siendo el string canónico en español (se usa internamente para lógica de juego, p. ej. contar géneros únicos).
-- Botón de idioma: 4 instancias (una por pantalla), todas con `data-lang-toggle` y clase `.lang-toggle-floating` — **misma posición fija arriba a la derecha en las 4 pantallas** (esto se pidió explícitamente tras una primera versión donde el botón estaba integrado en la topbar de juego/simulación en vez de flotante).
+- Botón de idioma: 4 instancias (una por pantalla), todas con `data-lang-toggle`. **Ya no es `position:fixed`** (cambio explícito de Diego, revirtiendo la decisión anterior): en juego y simulación vive dentro de `.topbar-right`, como un pill más junto a presupuesto y ronda (clase `.lang-toggle`, sin `.lang-toggle-floating`); en inicio, resultado y clasificación sigue con la clase `.lang-toggle-floating`, pero esa clase ahora es `position:absolute` (no `fixed`) anclada arriba a la derecha de su `.screen` — cada `.screen` es su contexto de posicionamiento (`position:relative` en la regla base). Se desplaza con el contenido en vez de quedar pegado al viewport al hacer scroll.
 - Cambiar de idioma en la pantalla de resultado regenera el póster y refresca textos sin recargar (`refreshResultTexts()`).
 
 Para añadir un texto nuevo: añadir la clave a ambos bloques de `TRANSLATIONS`, y usar `data-i18n` en el HTML estático o `t('clave')` en JS.
@@ -77,13 +77,15 @@ Para añadir un texto nuevo: añadir la clave a ambos bloques de `TRANSLATIONS`,
 
 Tres tramos, definidos al final de `css/styles.css`:
 
-- **Escritorio (>1100px)** — layout original: columnas fijas laterales (notificaciones a la izquierda, lineup a la derecha) y 3 tarjetas en rejilla.
+- **Escritorio (>1100px)** — layout original: columnas fijas laterales (notificaciones a la izquierda, lineup a la derecha) y 3 tarjetas en rejilla. Dentro de este tramo, **1101–1400px** ("escritorio pequeño") encoge `.game-sidebar`/`.notif-panel` de 300px a 230px y el padding lateral de `.game-body` de 360px a 270px a la par — sin esto, con las dos columnas a tamaño completo el hueco central para las tarjetas se quedaba muy estrecho y las tarjetas se veían diminutas junto a un lineup/notificaciones que no cambiaban de tamaño.
 - **Tablet (768–1100px)** — igual que escritorio pero sin columnas fijas (no caben): el lineup y las notificaciones pasan a bloques estáticos bajo las tarjetas, las notificaciones como tira horizontal. Las tarjetas mantienen las 3 columnas hasta 768px.
 - **Móvil (≤767px)** — rediseño completo:
   - Inicio: collage recortado a 4 caras + contador (`:nth-child(n+5){display:none}`), pasos compactos, CTA a ancho completo.
   - Juego: tarjetas en horizontal (foto 112px a la izquierda, datos a la derecha) para que las 3 quepan sin scroll; lineup como barra inferior fija y plegable. **Sin notificaciones** (decisión de Diego: el toast tapaba el título).
-  - Simulación: foto en banda con altura `clamp(190px, 32vh, 268px)`, timeline en segmentos en vez de círculos numerados, botón de saltar en flujo con `margin-top:auto`.
+  - Simulación: foto en banda con altura `clamp(190px, 32vh, 268px)`, timeline en segmentos en vez de círculos numerados, botón de saltar `position:fixed` al fondo salvo durante un evento de decisión (ver trampas más abajo).
   - Resultado: anillo de 132px, atributos en rejilla 2×2, botones en rejilla.
+
+Además, `@media (max-height: 820px)` (aplica a laptops con ventana no maximizada Y a móviles bajos, es width-agnostic a propósito) le da a `.hero-content` un `padding-top:22px`: sin eso, en pantallas de poca altura el título "Arma tu Cartel" quedaba pegado al borde superior porque el bloque centrado no dejaba aire arriba.
 
 Dos detalles estructurales que sostienen esto:
 
@@ -92,12 +94,12 @@ Dos detalles estructurales que sostienen esto:
 
 Tres trampas del móvil que ya costaron un bug y conviene no repetir:
 
-- **El botón de idioma es `position:fixed`** y en las 4 pantallas está arriba a la derecha (decisión explícita de Diego). En móvil, en juego y simulación, se le da la misma caja que los pills de la topbar (`top:10px`, `padding:4px 9px`, `font-size:10.5px`, fondo sólido sin blur) para que se lea como un elemento más de la barra en vez de algo flotante encima. `.topbar-inner` reserva su hueco con `padding-right:60px`.
-- **La topbar de móvil va justa de ancho**: `.topbar-inner` tiene `gap:12px` además del padding, y `flex-wrap:wrap`, así que en cuanto el contenido se pasa unos pocos px la barra se parte en dos filas (pasó con "Concierto 10 / 10" + presupuesto lleno). Por eso en móvil `.topbar-round` oculta la palabra y deja solo el contador. Al añadir cualquier cosa a esa barra, medir el peor caso: concierto 10/10 con el presupuesto casi agotado.
-- **El botón de saltar simulación no puede ser `position:fixed`**: con un evento de decisión la tarjeta crece y los botones de opción quedaban debajo. Va en flujo con `margin-top:auto`, que lo baja al fondo solo cuando sobra sitio.
+- **El botón de idioma ya no es `position:fixed`** (ver "Sistema de i18n" más arriba). En juego y simulación es literalmente un hijo más de `.topbar-right` (mismo HTML que los pills de presupuesto/ronda), así que ya no hace falta reservar hueco con padding — se resolvió solo, vía flexbox.
+- **La topbar de móvil va justa de ancho**: `.topbar-inner` tiene `gap:12px` además del padding, y `flex-wrap:wrap`, así que en cuanto el contenido se pasa unos pocos px la barra se parte en dos filas (pasó con "Concierto 10 / 10" + presupuesto lleno, y de nuevo hubo que revalidarlo al añadir el botón de idioma como tercer pill). Por eso en móvil `.topbar-round` oculta la palabra y deja solo el contador. Al añadir cualquier cosa a esa barra, medir el peor caso: concierto 10/10 con el presupuesto casi agotado.
+- **El botón de saltar simulación es `position:fixed` al fondo en móvil, salvo durante un evento de decisión.** Versión anterior: siempre en flujo con `margin-top:auto`, para no superponerse a los botones de opción cuando la tarjeta de evento crecía — pero con contenido alto, `margin-top:auto` ya no bastaba para mantenerlo dentro del viewport, y el botón podía quedar invisible bajo el pliegue sin ningún indicio de que hubiera que hacer scroll. Ahora `app.js` añade la clase `.has-decision` a `.sim-body` mientras las opciones de una decisión están visibles (`simRenderEventDecision`) y la quita al elegir o al empezar cada concierto (`simPlayNextConcert`); el CSS usa esa clase para volver al comportamiento en-flujo solo en ese momento puntual. `.sim-body` reserva `padding-bottom:78px` para que la barra fija no tape la última tarjeta cuando el botón está fijo.
 - **Las fotos de artista son casi cuadradas (261×281)**. Cualquier caja apaisada obliga a `background-size:cover` a recortar mucha altura: a 345×212 se veía solo el 57% y parecía un zoom excesivo. De ahí el `clamp` en `.sim-card-photo`.
 
-Medido en navegador real a 375×812: inicio, juego y simulación sin scroll; resultado ~2px. En 375×667 (iPhone SE) los botones de decisión quedan sobre el pliegue, con ~60px de scroll solo para alcanzar el botón de saltar. Existe un bloque `@media (max-width:767px) and (max-height:700px)` que recorta lo prescindible en móviles bajos (oculta el badge de directo, aprieta márgenes).
+Medido en navegador real a 375×812: inicio, juego y simulación sin scroll; resultado ~2px. En 375×667 (iPhone SE) verificado con automatización de navegador: el botón de saltar es visible sin scroll fuera de una decisión, y durante una decisión los botones de opción no se solapan con él (ver trampa del botón de saltar más arriba). Existe además un bloque `@media (max-width:767px) and (max-height:700px)` que recorta lo prescindible en móviles bajos (oculta el badge de directo, aprieta márgenes).
 
 ## Clasificación (semanal y global)
 

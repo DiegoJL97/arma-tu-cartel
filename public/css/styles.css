@@ -34,7 +34,7 @@
 
   .wrap{ max-width: 1080px; margin: 0 auto; padding: 28px 16px 80px; }
 
-  .screen{ display:none; }
+  .screen{ display:none; position:relative; }
   .screen.active{ display:block; }
 
   /* ---------- LANDING / HERO ---------- */
@@ -150,6 +150,9 @@
   .hero-privacy-link:hover{ opacity:1; color: var(--cyan); }
 
   @media (max-height: 820px){
+    /* Con poca altura de ventana el titulo quedaba pegado al borde
+       superior (el bloque centrado no dejaba aire arriba). */
+    .hero-content{ padding-top: 22px; }
     .hero-collage{ margin: 34px 0 32px; }
     .hero-collage-photo, .hero-collage-more{ width:125px; height:125px; }
     .hero-collage-caption{ margin-bottom:32px; }
@@ -195,8 +198,14 @@
     transition: color .2s ease, border-color .2s ease;
   }
   .lang-toggle:hover{ color: var(--pink); border-color: var(--pink); }
+  /* No es position:fixed a proposito (cambio explicito de Diego): en las
+     pantallas sin topbar (inicio, resultado, clasificacion) se posiciona
+     dentro de esa .screen (que ahora es el contexto de posicionamiento,
+     ver ".screen" mas arriba), asi que se desplaza con el contenido en vez
+     de quedar pegado al viewport. En juego y simulacion el boton ya no usa
+     esta clase: vive dentro de .topbar-right, como un pill mas. */
   .lang-toggle-floating{
-    position: fixed; top:16px; right:16px; z-index:100;
+    position: absolute; top:16px; right:16px; z-index:100;
     background: rgba(21,18,31,0.85); backdrop-filter: blur(6px);
   }
   .btn-hero-pill .btn-arrow{ display:inline-block; margin-left:6px; transition: transform .15s ease; }
@@ -320,6 +329,17 @@
     pointer-events:none;
   }
   @media (max-width: 1100px){ .notif-panel{ display:none; } }
+
+  /* Escritorio pequeño (1101-1400px): con las dos columnas fijas a 300px el
+     hueco central para las tarjetas se quedaba muy estrecho y las tarjetas
+     se encogian mucho mientras el lineup y las notificaciones seguian a
+     tamaño completo. Se encogen ambas columnas (y el hueco que les reserva
+     .game-body) para que la proporcion no se rompa. */
+  @media (min-width: 1101px) and (max-width: 1400px){
+    .game-sidebar{ width:230px; right:16px; }
+    .notif-panel{ width:230px; left:16px; }
+    .game-body{ padding-left:270px; padding-right:270px; }
+  }
 
   .notif-card{
     background: rgba(21,18,31,0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -803,24 +823,16 @@
     .hero-privacy-link{ font-size:9px; margin-bottom:16px; }
 
     /* ---- 2. ELEGIR ARTISTA ---- */
-    /* El boton de idioma es fixed arriba a la derecha: reservamos su hueco
-       para que presupuesto y ronda no queden debajo. */
-    .topbar-inner{ padding:9px 60px 9px 14px; }
+    .topbar-inner{ padding:9px 14px; }
 
-    /* En las pantallas con topbar, el boton deja de parecer un elemento
-       flotante y se alinea como un pill mas de la barra: misma altura,
-       mismo borde superior y mismo margen derecho que el resto. */
-    #screen-game .lang-toggle-floating,
-    #screen-simulation .lang-toggle-floating{
-      top:10px; right:14px;
-      padding:4px 9px; font-size:10.5px;
-      background: var(--bg-panel); backdrop-filter:none; -webkit-backdrop-filter:none;
-    }
     .topbar-brand span{ display:none; }   /* deja solo el emoji */
     .topbar-brand{ font-size:17px; }
     .topbar-budget{ font-size:10.5px; padding:4px 8px; }
     .topbar-round{ font-size:10.5px; padding:4px 8px; }
     .topbar-right{ gap:8px; }
+    /* El boton de idioma vive dentro de topbar-right, como un pill mas:
+       mismo tratamiento que presupuesto y ronda en vez de flotar aparte. */
+    .topbar-right .lang-toggle{ padding:4px 8px; font-size:10.5px; }
     /* "Concierto 10 / 10" no cabe junto al presupuesto y el boton de idioma:
        .topbar-inner haria wrap y la barra pasaria a dos filas. En movil se
        queda solo el contador; la palabra la da el contexto y la barra de
@@ -912,12 +924,26 @@
     .sim-hype-panel{ padding:12px 13px; margin-bottom:11px; }
     .sim-event-card{ margin-bottom:11px; }
     .sim-event-actions .btn{ font-size:11.5px; padding:10px 6px; }
-    /* En flujo con margin-top:auto: baja solo al fondo cuando sobra sitio, y
-       cuando el evento es de decision (tarjeta alta) se aparta en vez de
-       quedar flotando encima de los botones de opcion. */
+    /* Barra fija al fondo por defecto: con contenido alto, margin-top:auto
+       ya no bastaba para mantenerlo dentro del viewport y el boton
+       desaparecia bajo el pliegue sin ningun indicio de que hubiera que
+       hacer scroll. .sim-body reserva el hueco (padding-bottom) para que
+       la barra fija no tape la ultima tarjeta. Cuando el evento activo es
+       de decision (JS anade .has-decision a .sim-body mientras las
+       opciones estan visibles) vuelve al flujo normal con margin-top:auto,
+       igual que antes: la tarjeta de decision puede crecer sin que el
+       boton fijo se superponga a sus botones de opcion. */
+    .sim-body{ padding-bottom:78px; }
     .sim-skip{
+      position:fixed; left:14px; right:14px;
+      bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+      margin-top:0; padding:12px; font-size:13px; z-index:25;
+      box-shadow: 0 -6px 18px rgba(0,0,0,0.35);
+    }
+    .sim-body.has-decision{ padding-bottom:14px; }
+    .sim-body.has-decision .sim-skip{
       position:static; align-self:stretch; width:100%;
-      margin-top:auto; padding:12px; font-size:13px;
+      margin-top:auto; box-shadow:none; left:auto; right:auto; bottom:auto;
     }
 
     /* ---- 4. RESULTADO ---- */
