@@ -189,6 +189,14 @@ Se valoró cambiar el nombre pero se decidió **mantener "Arma tu Cartel"**. Pun
 - Todo cambio se verifica antes de darlo por cerrado: comprobación de sintaxis + los dos scripts de test jsdom.
 - Comunicación preferida: concisa y directa, sin rodeos innecesarios.
 
+## Política de privacidad
+
+`public/privacidad.html` — página estática aparte, enlazada desde el aviso legal del inicio (`.hero-privacy-link`) y desde el bloque de publicar en resultado (`.publish-privacy-link`). Explica qué se guarda en `localStorage`, qué se guarda en el servidor al publicar (alias, país, puntuación/lineup, IP solo como hash), qué NO se hace (sin cuentas, sin cookies de rastreo, sin venta de datos), y cómo pedir que se borre algo.
+
+**Deliberadamente no reutiliza `app.js`**: cargar el script completo del juego en esta página rompería, porque tiene varios `document.getElementById(...).addEventListener(...)` sin comprobar null (asumen que los elementos del juego existen). En vez de eso, la página lleva su propio script mínimo de traducción (objeto `T` con `es`/`en`), que sí lee y escribe la misma clave `armaTuCartelLang` de `localStorage`, así que el idioma queda sincronizado con el resto del sitio sin depender de `app.js`.
+
+**Pendiente real, no maquillado en el texto**: la política dice explícitamente que el borrado del hash de IP (`ip_hash` en `scores`) no está automatizado todavía — porque no lo está (ver el comentario de purga sugerida al final de `schema.sql`). Si se automatiza (p. ej. un Cron Trigger en el Worker), hay que actualizar esa frase.
+
 ## Contacto / branding en el propio juego
 
 Botón de sugerencias en la pantalla de resultado → `mailto:armatucartel@gmail.com`. El asunto del email cambia según el idioma activo.

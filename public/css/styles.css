@@ -139,9 +139,15 @@
   .hero-disclaimer{
     position: relative; z-index: 5; text-align:center;
     font-size:11px; line-height:1.5; color: var(--muted); opacity:0.75;
-    max-width:560px; margin: 24px auto 0; padding: 0 20px 22px;
+    max-width:560px; margin: 24px auto 0; padding: 0 20px;
     text-shadow: 0 2px 8px rgba(0,0,0,0.5);
   }
+  .hero-privacy-link{
+    position: relative; z-index: 5; display:block; text-align:center;
+    font-size:10.5px; color: var(--muted); opacity:0.75;
+    margin: 8px auto 22px; text-decoration:underline;
+  }
+  .hero-privacy-link:hover{ opacity:1; color: var(--cyan); }
 
   @media (max-height: 820px){
     .hero-collage{ margin: 34px 0 32px; }
@@ -150,7 +156,8 @@
     .hero-steps{ gap:12px; margin-bottom:36px; }
     .hero-step{ padding:12px; }
     .hero-step-body{ font-size:11.5px; line-height:1.35; }
-    .hero-disclaimer{ margin-top:16px; font-size:10.5px; padding-bottom:16px; }
+    .hero-disclaimer{ margin-top:16px; font-size:10.5px; }
+    .hero-privacy-link{ margin-bottom:16px; }
   }
 
   .btn{
@@ -503,6 +510,11 @@
     margin:9px 0 0; min-height:1px;
   }
   .publish-msg.is-error{ color:#FF7A7A; }
+  .publish-privacy-link{
+    display:block; text-align:center; margin-top:10px;
+    font-size:10px; color: var(--muted); opacity:0.75; text-decoration:underline;
+  }
+  .publish-privacy-link:hover{ opacity:1; color: var(--cyan); }
   .publish-done{
     font-family:'JetBrains Mono', monospace; font-size:12px; color: var(--cyan);
     text-align:center; margin:0 0 16px;
@@ -787,7 +799,8 @@
        compacto). En movil el CTA siempre fue a ancho completo. */
     .hero-cta-group{ max-width:none; }
     .btn-hero-pill{ width:100%; padding:15px 0; }
-    .hero-disclaimer{ font-size:9px; margin-top:14px; padding-bottom:16px; }
+    .hero-disclaimer{ font-size:9px; margin-top:14px; }
+    .hero-privacy-link{ font-size:9px; margin-bottom:16px; }
 
     /* ---- 2. ELEGIR ARTISTA ---- */
     /* El boton de idioma es fixed arriba a la derecha: reservamos su hueco

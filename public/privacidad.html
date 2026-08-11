@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">Privacidad — Arma tu Cartel</title>
+<meta name="description" content="Qué datos guarda Arma tu Cartel, para qué, cuánto tiempo y cómo pedir que se borren.">
+<meta name="theme-color" content="#0B0A14">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AA%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .legal-wrap{ max-width:680px; margin:0 auto; padding:60px 20px 80px; }
+  .legal-back{ display:inline-block; margin-bottom:26px; color:var(--muted); font-family:'Space Grotesk',sans-serif; font-size:13px; text-decoration:none; }
+  .legal-back:hover{ color:var(--text); }
+  .legal-wrap h1{ font-family:'Anton',sans-serif; font-weight:400; font-size:clamp(30px,6vw,42px); margin:0 0 6px; }
+  .legal-updated{ font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); margin:0 0 30px; }
+  .legal-tldr{ background:var(--bg-panel); border:1px solid var(--line); border-radius:var(--radius); padding:18px 20px; margin-bottom:34px; }
+  .legal-tldr p{ font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--cyan); margin:0 0 10px; }
+  .legal-tldr ul{ margin:0; padding-left:20px; font-size:14.5px; line-height:1.7; }
+  .legal-wrap h2{ font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:18px; margin:34px 0 10px; color:var(--gold); }
+  .legal-wrap p, .legal-wrap li{ font-size:14.5px; line-height:1.75; color:var(--text); }
+  .legal-wrap ul{ padding-left:20px; }
+  .legal-wrap a{ color:var(--cyan); }
+  .legal-wrap code{ font-family:'JetBrains Mono',monospace; font-size:0.9em; background:var(--bg-panel); padding:1px 5px; border-radius:4px; }
+  .legal-lang{ display:flex; justify-content:flex-end; margin-bottom:-10px; }
+</style>
+</head>
+<body>
+
+<div class="legal-wrap">
+  <div class="legal-lang">
+    <button class="lang-toggle" id="legalLangToggle" aria-label="Change language / Cambiar idioma">EN</button>
+  </div>
+
+  <a class="legal-back" href="index.html" id="legalBack">← Volver a Arma tu Cartel</a>
+
+  <div id="legalContent"></div>
+</div>
+
+<script>
+(function(){
+  var LANG_KEY = 'armaTuCartelLang';
+  var lang = 'es';
+  try {
+    var stored = window.localStorage.getItem(LANG_KEY);
+    if (stored === 'es' || stored === 'en') lang = stored;
+  } catch(e){}
+
+  var T = {
+    es: {
+      pageTitle: 'Privacidad — Arma tu Cartel',
+      back: '← Volver a Arma tu Cartel',
+      h1: 'Privacidad',
+      updated: 'Última actualización: agosto de 2026',
+      tldrLabel: 'Resumen rápido',
+      tldr: [
+        'No hay cuentas, ni contraseñas, ni email obligatorio.',
+        'No usamos cookies de rastreo ni publicidad.',
+        'Si publicas tu puntuación, guardamos el alias que elijas, tu país, tu resultado y un identificador aleatorio — nunca tu nombre real ni tu email.',
+        'Tu IP se usa un instante, cifrada de forma irreversible, solo para frenar abuso — nunca se guarda en claro ni se muestra a nadie.',
+        '¿Quieres que borremos algo? Escribe a <a href="mailto:armatucartel@gmail.com">armatucartel@gmail.com</a>.'
+      ],
+      s1h: 'Qué se guarda en tu propio dispositivo',
+      s1: 'Arma tu Cartel usa <code>localStorage</code> de tu navegador — datos que no salen de tu dispositivo salvo que tú decidas publicar tu puntuación. Guardamos: tu idioma preferido, tu mejor puntuación personal, y (si has publicado alguna vez) el alias y país que usaste la última vez, para no tener que escribirlos de nuevo. Puedes borrar todo esto en cualquier momento desde los ajustes de tu navegador.',
+      s2h: 'Qué se guarda en el servidor si publicas tu puntuación',
+      s2: 'Publicar en la clasificación es opcional y solo ocurre si pulsas el botón "Publicar en la clasificación" al final de una partida. En ese momento se envían y se guardan:',
+      s2list: [
+        'El alias que escribas (recomendamos que no sea tu nombre real).',
+        'El país que selecciones.',
+        'Tu puntuación, la asistencia total y los artistas de tu cartel.',
+        'Un identificador aleatorio (no vinculado a tu identidad) para poder mostrar "tu mejor cartel" en próximas visitas.',
+        'Tu dirección IP, pero nunca en texto plano: se transforma con una función criptográfica irreversible (hash con sal) antes de guardarse, y solo se usa para limitar envíos masivos automatizados.'
+      ],
+      s3h: 'Qué NO hacemos',
+      s3list: [
+        'No pedimos ni guardamos email, teléfono ni contraseña.',
+        'No vendemos ni compartimos datos con publicidad ni con terceros ajenos al funcionamiento del juego.',
+        'No usamos cookies de rastreo ni huellas digitales del navegador.',
+        'No te obligamos a publicar tu puntuación — el juego funciona igual si no lo haces.'
+      ],
+      s4h: 'Analítica',
+      s4: 'Usamos <a href="https://www.goatcounter.com/" target="_blank" rel="noopener">GoatCounter</a>, una herramienta de analítica sin cookies pensada para proyectos pequeños. Solo registra visitas y unos pocos eventos agregados (empezar partida, terminar partida, descargar póster) — no identifica a personas individuales.',
+      s5h: 'Cuánto tiempo se conserva',
+      s5: 'Los datos en tu navegador (<code>localStorage</code>) permanecen hasta que tú los borres. Las puntuaciones publicadas se conservan mientras el juego esté activo, para que la clasificación tenga sentido. El hash de tu IP se usa solo a corto plazo para detectar abuso; hoy en día su borrado no está automatizado, así que puede persistir junto a la fila de la puntuación — nunca se usa para nada más que ese control de abuso, y puedes pedir que se elimine (ver más abajo).',
+      s6h: 'Con quién se comparte',
+      s6: 'El sitio y la base de datos viven en <a href="https://www.cloudflare.com/" target="_blank" rel="noopener">Cloudflare</a>, como proveedor de infraestructura — no como tercero con fines propios. Lo mismo aplica a GoatCounter para la analítica. Ninguno de los dos recibe datos con fines publicitarios.',
+      s7h: 'Tus derechos',
+      s7: 'Puedes pedir en cualquier momento que eliminemos tu puntuación de la clasificación, o que te confirmemos qué datos tenemos asociados a un alias concreto. Escribe a <a href="mailto:armatucartel@gmail.com?subject=Privacidad%20-%20Arma%20tu%20Cartel">armatucartel@gmail.com</a> indicando el alias con el que publicaste.',
+      s8h: 'Contacto',
+      s8: '¿Dudas sobre esto? Escribe a <a href="mailto:armatucartel@gmail.com">armatucartel@gmail.com</a>.'
+    },
+    en: {
+      pageTitle: 'Privacy — Arma tu Cartel',
+      back: '← Back to Arma tu Cartel',
+      h1: 'Privacy',
+      updated: 'Last updated: August 2026',
+      tldrLabel: 'Quick summary',
+      tldr: [
+        'No accounts, no passwords, no email required.',
+        'No tracking cookies, no advertising.',
+        'If you publish your score, we store the alias you pick, your country, your result and a random identifier — never your real name or email.',
+        'Your IP is used for a moment, irreversibly hashed, only to curb abuse — never stored in the clear or shown to anyone.',
+        'Want something removed? Email <a href="mailto:armatucartel@gmail.com">armatucartel@gmail.com</a>.'
+      ],
+      s1h: 'What stays on your own device',
+      s1: 'Arma tu Cartel uses your browser\'s <code>localStorage</code> — data that never leaves your device unless you choose to publish a score. We store: your preferred language, your personal best score, and (if you\'ve ever published) the alias and country you used last time, so you don\'t have to retype them. You can clear all of this anytime from your browser settings.',
+      s2h: 'What\'s stored server-side if you publish a score',
+      s2: 'Publishing to the leaderboard is optional and only happens if you tap "Publish to the leaderboard" at the end of a round. At that point we send and store:',
+      s2list: [
+        'The alias you type (we recommend it not be your real name).',
+        'The country you select.',
+        'Your score, total attendance, and your lineup of artists.',
+        'A random identifier (not tied to your identity) so we can show "your best lineup" on future visits.',
+        'Your IP address, but never in plain text: it\'s transformed with a one-way cryptographic function (salted hash) before being stored, and only used to limit automated mass submissions.'
+      ],
+      s3h: 'What we don\'t do',
+      s3list: [
+        'We don\'t ask for or store email, phone number, or password.',
+        'We don\'t sell or share data for advertising or with unrelated third parties.',
+        'We don\'t use tracking cookies or browser fingerprinting.',
+        'We never require you to publish your score — the game works the same either way.'
+      ],
+      s4h: 'Analytics',
+      s4: 'We use <a href="https://www.goatcounter.com/" target="_blank" rel="noopener">GoatCounter</a>, a cookieless analytics tool built for small projects. It only records visits and a few aggregate events (game started, game completed, poster downloaded) — it doesn\'t identify individual people.',
+      s5h: 'How long we keep it',
+      s5: 'Data in your browser (<code>localStorage</code>) stays until you clear it. Published scores are kept while the game is active, so the leaderboard keeps making sense. Your hashed IP is only meant for short-term abuse detection; deletion isn\'t automated yet, so it may persist alongside the score row — it\'s never used for anything beyond that abuse check, and you can ask us to remove it (see below).',
+      s6h: 'Who we share it with',
+      s6: 'The site and database live on <a href="https://www.cloudflare.com/" target="_blank" rel="noopener">Cloudflare</a>, as our infrastructure provider — not as a third party with its own purposes. The same applies to GoatCounter for analytics. Neither receives data for advertising purposes.',
+      s7h: 'Your rights',
+      s7: 'You can ask at any time for your leaderboard score to be deleted, or for confirmation of what data we hold for a given alias. Email <a href="mailto:armatucartel@gmail.com?subject=Privacy%20-%20Arma%20tu%20Cartel">armatucartel@gmail.com</a> with the alias you published under.',
+      s8h: 'Contact',
+      s8: 'Questions about this? Email <a href="mailto:armatucartel@gmail.com">armatucartel@gmail.com</a>.'
+    }
+  };
+
+  function li(items){ return '<ul>' + items.map(function(t){ return '<li>' + t + '</li>'; }).join('') + '</ul>'; }
+
+  function render(){
+    var t = T[lang];
+    document.documentElement.setAttribute('lang', lang);
+    document.title = t.pageTitle;
+    document.getElementById('pageTitle').textContent = t.pageTitle;
+    document.getElementById('legalBack').textContent = t.back;
+    document.getElementById('legalLangToggle').textContent = lang === 'es' ? 'EN' : 'ES';
+
+    document.getElementById('legalContent').innerHTML =
+      '<h1>' + t.h1 + '</h1>' +
+      '<p class="legal-updated">' + t.updated + '</p>' +
+      '<div class="legal-tldr"><p>' + t.tldrLabel + '</p>' + li(t.tldr) + '</div>' +
+      '<h2>' + t.s1h + '</h2><p>' + t.s1 + '</p>' +
+      '<h2>' + t.s2h + '</h2><p>' + t.s2 + '</p>' + li(t.s2list) +
+      '<h2>' + t.s3h + '</h2>' + li(t.s3list) +
+      '<h2>' + t.s4h + '</h2><p>' + t.s4 + '</p>' +
+      '<h2>' + t.s5h + '</h2><p>' + t.s5 + '</p>' +
+      '<h2>' + t.s6h + '</h2><p>' + t.s6 + '</p>' +
+      '<h2>' + t.s7h + '</h2><p>' + t.s7 + '</p>' +
+      '<h2>' + t.s8h + '</h2><p>' + t.s8 + '</p>';
+  }
+
+  document.getElementById('legalLangToggle').addEventListener('click', function(){
+    lang = lang === 'es' ? 'en' : 'es';
+    try { window.localStorage.setItem(LANG_KEY, lang); } catch(e){}
+    render();
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>

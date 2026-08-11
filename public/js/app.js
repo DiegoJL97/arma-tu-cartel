@@ -28,7 +28,8 @@
         step3Title: '3. Consigue tu cartel',
         step3Body: 'Descubre tu puntuación y descarga el póster de tu festival.',
         startBtn: 'Empezar a jugar',
-        disclaimer: 'Juego de fans con fines de entretenimiento, sin relación oficial con los artistas, sus representantes o discográficas. Los datos de sueldo, aforo y directo son ficticios y solo sirven para la mecánica del juego. Las imágenes son ilustraciones generadas por IA, no fotografías reales. Nombres e imágenes pertenecen a sus respectivos propietarios.'
+        disclaimer: 'Juego de fans con fines de entretenimiento, sin relación oficial con los artistas, sus representantes o discográficas. Los datos de sueldo, aforo y directo son ficticios y solo sirven para la mecánica del juego. Las imágenes son ilustraciones generadas por IA, no fotografías reales. Nombres e imágenes pertenecen a sus respectivos propietarios.',
+        privacyLink: 'Privacidad'
       },
       game: {
         sectionTitle: 'Elige un artista',
@@ -119,7 +120,8 @@
         publishError: 'No se ha podido publicar. Inténtalo de nuevo.',
         aliasTooShort: 'El alias necesita al menos 2 caracteres.',
         aliasRejected: 'Ese alias no se admite. Prueba con otro.',
-        rateLimited: 'Demasiados envíos seguidos. Espera un rato.'
+        rateLimited: 'Demasiados envíos seguidos. Espera un rato.',
+        privacyLink: 'Qué hacemos con estos datos'
       }
     },
     en: {
@@ -134,7 +136,8 @@
         step3Title: '3. Get your lineup',
         step3Body: 'Find out your score and download your festival poster.',
         startBtn: 'Start playing',
-        disclaimer: 'Fan-made game for entertainment purposes, not affiliated with or endorsed by the artists, their management or record labels. Salary, attendance and live-show figures are fictional and exist only for gameplay. All artwork is AI-generated illustration, not real photography. All names and images belong to their respective owners.'
+        disclaimer: 'Fan-made game for entertainment purposes, not affiliated with or endorsed by the artists, their management or record labels. Salary, attendance and live-show figures are fictional and exist only for gameplay. All artwork is AI-generated illustration, not real photography. All names and images belong to their respective owners.',
+        privacyLink: 'Privacy'
       },
       game: {
         sectionTitle: 'Pick an artist',
@@ -225,7 +228,8 @@
         publishError: "Couldn't publish. Please try again.",
         aliasTooShort: 'Your alias needs at least 2 characters.',
         aliasRejected: "That alias isn't allowed. Try another one.",
-        rateLimited: 'Too many submissions. Please wait a while.'
+        rateLimited: 'Too many submissions. Please wait a while.',
+        privacyLink: "What we do with this data"
       }
     }
   };
