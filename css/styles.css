@@ -174,6 +174,12 @@
   .btn-hero-pill:hover{ transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,46,147,0.4); }
   .btn-hero-pill:active{ transform: translateY(0) scale(0.98); }
 
+  /* Columna de ancho fijo: garantiza que "Empezar a jugar" y "Ver
+     clasificacion" midan exactamente lo mismo pese a tener textos
+     distintos, en vez de que cada boton se ajuste a su propio contenido. */
+  .hero-cta-group{ max-width:300px; margin:0 auto; display:flex; flex-direction:column; gap:14px; }
+  .hero-cta-group .btn-hero-pill{ width:100%; text-align:center; }
+
   /* ---------- LANGUAGE TOGGLE ---------- */
   .lang-toggle{
     font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:700; letter-spacing:0.06em;
@@ -419,6 +425,12 @@
     background: var(--bg-panel); border:1px solid var(--line); border-radius: var(--radius);
     padding:20px; margin-bottom:22px;
   }
+
+  /* Standalone, fuera de poster-preview-actions a proposito: asi su posicion
+     (justo debajo de las stats) es identica en movil y escritorio, sin que
+     el reordenado movil del bloque de publicar la mueva. */
+  .lb-entry-btn{ width:100%; margin-bottom:16px; }
+  .lb-entry-btn[hidden]{ display:none; }
   .attr-panel .stat-row{ margin-bottom:12px; }
   .attr-panel .stat-label{ width:70px; font-size:11px; }
   .attr-panel .stat-bar-bg{ height:9px; }
@@ -466,7 +478,22 @@
     font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:600;
   }
   .publish-input{ flex:1; min-width:0; }
-  .publish-select{ width:150px; flex-shrink:0; cursor:pointer; }
+  /* El <select> nativo en Windows no pinta banderas emoji dentro de las
+     <option>: se ven como recuadros con las letras del pais. Por eso la
+     bandera vive fuera, superpuesta en texto normal (que si renderiza en
+     cualquier SO), y el <option> solo lleva el nombre del pais. */
+  /* Imagen real en vez de emoji de bandera: Windows no trae banderas en su
+     fuente de emoji en ningun contexto del DOM (no es solo cosa del
+     <select>), asi que el codigo de pais se veia como texto plano. */
+  .flag-img{ width:20px; height:15px; border-radius:3px; object-fit:cover; box-shadow:0 0 0 1px rgba(255,255,255,0.15); vertical-align:middle; }
+  .flag-blank{ display:inline-block; width:20px; height:15px; border-radius:3px; background:var(--line); vertical-align:middle; }
+
+  .publish-select-wrap{ position:relative; width:150px; flex-shrink:0; }
+  .publish-select-flag{
+    position:absolute; left:11px; top:50%; transform:translateY(-50%);
+    line-height:1; pointer-events:none;
+  }
+  .publish-select{ width:100%; padding-left:32px; cursor:pointer; }
   .publish-input:focus, .publish-select:focus{
     outline:none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(0,229,199,0.14);
   }
@@ -482,11 +509,13 @@
   }
   .publish-done[hidden]{ display:none; }
   .hero-lb-link{
-    background:none; border:none; cursor:pointer; display:block; width:100%;
-    color: var(--muted); font-family:'Space Grotesk', sans-serif; font-size:13px;
-    text-decoration:underline; padding:14px 0 0;
+    display:block; width:100%;
+    background: rgba(21,18,31,0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border:1px solid rgba(255,184,0,0.35); border-radius:999px;
+    color: var(--gold); font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px;
+    padding:12px 0; cursor:pointer; transition: border-color .15s ease, background .15s ease;
   }
-  .hero-lb-link:hover{ color: var(--text); }
+  .hero-lb-link:hover{ border-color: var(--gold); background: rgba(28,23,41,0.85); }
   .hero-lb-link[hidden]{ display:none; }
 
   /* ---------- LEADERBOARD SCREEN ---------- */
@@ -533,7 +562,8 @@
   .lb-medal-1 .lb-rank{ color: var(--gold); font-size:16px; }
   .lb-medal-2 .lb-rank{ color:#D8D3E0; font-size:15px; }
   .lb-medal-3 .lb-rank{ color:#C08552; font-size:15px; }
-  .lb-flag{ font-size:17px; width:23px; text-align:center; flex-shrink:0; }
+  .lb-flag{ width:23px; text-align:center; flex-shrink:0; }
+  .lb-flag .flag-img, .lb-flag .flag-blank{ width:22px; height:16px; }
   .lb-who{ flex:1; min-width:0; }
   .lb-nick{
     display:block; font-size:15px; font-weight:700; line-height:1.2;
@@ -752,6 +782,10 @@
     .hero-step-icon{ font-size:19px; }
     .hero-step-title{ font-size:12.5px; }
     .hero-step-body{ font-size:10.5px; line-height:1.4; }
+    /* El limite de 300px de .hero-cta-group es para pantallas grandes
+       (evita que "Ver clasificacion" quede gigante junto a un CTA
+       compacto). En movil el CTA siempre fue a ancho completo. */
+    .hero-cta-group{ max-width:none; }
     .btn-hero-pill{ width:100%; padding:15px 0; }
     .hero-disclaimer{ font-size:9px; margin-top:14px; padding-bottom:16px; }
 
@@ -895,16 +929,26 @@
 
     .poster-preview{ margin-top:0; }
     .poster-preview img{ margin-bottom:9px; }
-    .poster-preview-actions{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    .poster-preview-actions .btn{ padding:12px 8px; font-size:13px; }
-    #posterDownloadLink, #suggestionLink{ grid-column:1 / -1; }
+    /* flex + flex-grow en vez de grid de 2 columnas: posterShareBtn es
+       condicional (solo si el navegador soporta Web Share), asi que el
+       numero de botones "a media anchura" puede ser par o impar. Con grid
+       fijo un numero impar deja un hueco vacio; con flex-grow, un boton que
+       se queda solo en su fila estira para ocupar el ancho entero. */
+    /* flex-direction:row explicito: hay una regla mas antigua en
+       @media(max-width:500px) que pone este contenedor en columna, y en
+       columna "flex-basis:130px" pasa a ser una ALTURA objetivo en vez de
+       un ancho, lo que dejaba "compartir" y "jugar de nuevo" enormes. */
+    .poster-preview-actions{ display:flex; flex-direction:row; flex-wrap:wrap; gap:8px; }
+    .poster-preview-actions .btn{ flex:1 1 130px; padding:12px 8px; font-size:13px; white-space:nowrap; }
+    #posterDownloadLink, #suggestionLink{ flex-basis:100%; }
+    /* Misma altura que los botones de arriba, aunque viva fuera de ese grupo. */
+    .lb-entry-btn{ padding:12px 8px; font-size:13px; margin-bottom:12px; }
 
     /* ---- bloque de publicar ---- */
-    /* En movil va al final: el poster y los botones de descargar/compartir
-       son lo primero que se quiere ver al acabar, y el bloque mide ~160px.
-       En escritorio se queda antes del poster (hay sitio de sobra). */
+    /* Mismo orden que en escritorio (atributos, publicar, ver clasificacion,
+       poster): pedido explicitamente por Diego. Version anterior lo mandaba
+       al final con order:1 para que el poster quedara antes; se quito. */
     #screen-result .wrap{ display:flex; flex-direction:column; }
-    .publish-box, .publish-done{ order:1; }
     .publish-box{ margin: 4px 0 0; }
     .publish-done{ margin: 10px 0 0; }
     .publish-box{ padding:12px; }
@@ -913,11 +957,15 @@
     .publish-icon{ font-size:15px; }
     .publish-row{ gap:7px; margin-bottom:8px; }
     .publish-input, .publish-select{ padding:10px 11px; font-size:13.5px; }
-    .publish-select{ width:108px; }
+    .publish-select{ padding-left:29px; }
+    .publish-select-wrap{ width:108px; }
+    .publish-select-flag{ left:10px; }
+    .publish-select-flag .flag-img, .publish-select-flag .flag-blank{ width:17px; height:13px; }
     .publish-box .btn{ padding:11px 8px; font-size:13px; }
     .publish-msg{ font-size:10px; margin-top:7px; }
     .publish-done{ font-size:11px; margin-bottom:12px; }
-    .hero-lb-link{ font-size:12px; padding-top:12px; }
+    .hero-lb-link{ font-size:12.5px; padding:10px 0; }
+    .hero-cta-group{ gap:10px; }
 
     /* ---- clasificación ---- */
     .lb-wrap{ padding:16px 14px 22px; }
@@ -931,7 +979,8 @@
     .lb-rank{ width:26px; font-size:12px; }
     .lb-medal-1 .lb-rank{ font-size:15px; }
     .lb-medal-2 .lb-rank, .lb-medal-3 .lb-rank{ font-size:14px; }
-    .lb-flag{ font-size:15px; width:20px; }
+    .lb-flag{ width:20px; }
+    .lb-flag .flag-img, .lb-flag .flag-blank{ width:19px; height:14px; }
     .lb-nick{ font-size:13.5px; }
     .lb-rowmeta{ font-size:8.5px; margin-top:2px; }
     .lb-pts{ font-size:16px; }

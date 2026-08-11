@@ -96,7 +96,8 @@ api/
 **Decisiones de diseño:**
 - El alias se pide **al final**, en la pantalla de resultado, no antes de jugar: pedirlo antes metía un formulario en el punto de máximo abandono. Se guarda en `localStorage` (`armaTuCartelAlias`, `armaTuCartelCountry`, `armaTuCartelClientId`).
 - Una sola tabla cubre ambas clasificaciones: la semanal filtra por `iso_week` (así el reinicio no necesita ninguna tarea programada) y las dos se deduplican por `client_id` para quedarse con el mejor cartel de cada jugador.
-- Los nombres de país **no se traducen a mano**: salen de `Intl.DisplayNames` en el idioma activo, y la bandera se compone del código ISO con indicadores regionales. No hay lista de países duplicada.
+- Los nombres de país **no se traducen a mano**: salen de `Intl.DisplayNames` en el idioma activo. No hay lista de países duplicada.
+- **Las banderas son imágenes, no emoji.** Windows no incluye banderas en su fuente de emoji (Segoe UI Emoji) en ningún contexto del DOM —ni siquiera en texto normal fuera de un `<select>`—, así que un código regional Unicode se veía como texto plano o un recuadro. `flagImgMarkup()` en app.js genera un `<img src="images/flags/{código}.png">`; las 34 banderas de `LB_COUNTRIES` están descargadas una vez en `images/flags/` (basadas en el set MIT "flag-icons" vía flagcdn.com, ~1-2KB cada una, sin dependencia externa en producción). Ojo: **sin `loading="lazy"`** a propósito — con lazy-loading real algunos entornos con problemas de compositing no llegan a disparar la carga. No confundir con `FLAG_SVGS` (más arriba, dibujadas a mano en SVG): esas cubren solo los ~10 países de artistas del roster para las tarjetas del juego, no los 34 de la clasificación.
 - En móvil el bloque de publicar va **al final** de la pantalla de resultado (`order:1`), porque mide ~160px y empujaba el póster y los botones de compartir por debajo del pliegue.
 
 **Seguridad — leer antes de tocar esto:**

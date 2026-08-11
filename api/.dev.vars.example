@@ -1,0 +1,12 @@
+# Plantilla de secretos para desarrollo local con `wrangler dev`.
+#
+# Copia este fichero a `.dev.vars` (que esta en .gitignore) y pon un valor
+# propio. En produccion el secreto NO se lee de aqui, sino del almacen de
+# Cloudflare, donde se guarda con:
+#
+#   wrangler secret put IP_SALT
+#
+# Sirve para hashear las IPs (SHA-256) y poder limitar abuso sin guardarlas
+# en claro. Cualquier cadena larga y aleatoria vale.
+
+IP_SALT="pon-aqui-una-cadena-larga-y-aleatoria"

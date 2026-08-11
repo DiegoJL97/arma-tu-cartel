@@ -1460,10 +1460,17 @@
     return id;
   }
 
-  function flagEmoji(code){
-    if(!/^[A-Za-z]{2}$/.test(code || '')) return '🏳️';
-    var up = code.toUpperCase();
-    return String.fromCodePoint(0x1F1E6 + up.charCodeAt(0) - 65, 0x1F1E6 + up.charCodeAt(1) - 65);
+  // Bandera como <img>, no como emoji: Windows no trae banderas en su
+  // fuente de emoji (Segoe UI Emoji) en NINGUN contexto del DOM, ni siquiera
+  // fuera de un <select>, asi que el codigo regional se ve como texto plano
+  // o un recuadro vacio. Las imagenes vienen de images/flags/, descargadas
+  // una vez de flagcdn.com (basadas en el set MIT "flag-icons").
+  function flagImgMarkup(code, extraClass){
+    var up = /^[A-Za-z]{2}$/.test(code || '') ? code.toUpperCase() : '';
+    if(!up) return '<span class="flag-blank' + (extraClass ? ' ' + extraClass : '') + '"></span>';
+    // Sin loading="lazy": son 1-2KB cada una, no aporta nada diferirlas.
+    return '<img class="flag-img' + (extraClass ? ' ' + extraClass : '') + '"' +
+      ' src="images/flags/' + code.toLowerCase() + '.png" alt="">';
   }
 
   function countryName(code){
@@ -1495,10 +1502,20 @@
     var sorted = LB_COUNTRIES.slice().sort(function(a, b){
       return countryName(a).localeCompare(countryName(b), currentLang);
     });
+    // Sin emoji en el <option>: en Windows el <select> nativo no renderiza
+    // banderas dentro del desplegable (salen como recuadros con letras). La
+    // bandera se muestra aparte, en updateCountryFlagPreview().
     sel.innerHTML = sorted.map(function(code){
-      return '<option value="' + code + '">' + flagEmoji(code) + '  ' + escapeHtml(countryName(code)) + '</option>';
+      return '<option value="' + code + '">' + escapeHtml(countryName(code)) + '</option>';
     }).join('');
     sel.value = current;
+    updateCountryFlagPreview();
+  }
+
+  function updateCountryFlagPreview(){
+    var sel = document.getElementById('countrySelect');
+    var flag = document.getElementById('countryFlagPreview');
+    if(sel && flag) flag.innerHTML = flagImgMarkup(sel.value);
   }
 
   /* --- llamadas a la API --- */
@@ -1622,7 +1639,7 @@
     if(isMe) cls += ' is-me';
     return '<div class="' + cls + '">' +
         '<span class="lb-rank">' + row.rank + '</span>' +
-        '<span class="lb-flag" title="' + escapeHtml(countryName(row.country)) + '">' + flagEmoji(row.country) + '</span>' +
+        '<span class="lb-flag" title="' + escapeHtml(countryName(row.country)) + '">' + flagImgMarkup(row.country) + '</span>' +
         '<span class="lb-who">' +
           '<span class="lb-nick">' + escapeHtml(row.alias) +
             (isMe ? '<span class="lb-you">' + t('lb.you') + '</span>' : '') +
@@ -1718,6 +1735,7 @@
     fillCountrySelect();
     var sel = document.getElementById('countrySelect');
     if(sel) sel.value = detectCountry();
+    updateCountryFlagPreview();
   }
 
   // Muestra u oculta las entradas a la clasificacion segun haya API o no.
@@ -1764,6 +1782,9 @@
         if(e.key === 'Enter'){ e.preventDefault(); submitScore(); }
       });
     }
+
+    var countrySel = document.getElementById('countrySelect');
+    if(countrySel) countrySel.addEventListener('change', updateCountryFlagPreview);
 
     applyLeaderboardVisibility();
   })();

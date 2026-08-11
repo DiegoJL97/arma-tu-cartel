@@ -68,8 +68,10 @@
           </div>
         </div>
 
-        <button class="btn-hero-pill" id="startBtn"><span data-i18n="landing.startBtn">Empezar a jugar</span> <span class="btn-arrow">→</span></button>
-        <button class="hero-lb-link" id="heroLeaderboardBtn" hidden data-i18n="lb.viewBtn">🏆 Ver clasificación</button>
+        <div class="hero-cta-group">
+          <button class="btn-hero-pill" id="startBtn"><span data-i18n="landing.startBtn">Empezar a jugar</span> <span class="btn-arrow">→</span></button>
+          <button class="hero-lb-link" id="heroLeaderboardBtn" hidden data-i18n="lb.viewBtn">🏆 Ver clasificación</button>
+        </div>
       </div>
 
       <p class="hero-disclaimer" data-i18n="landing.disclaimer">Juego de fans con fines de entretenimiento, sin relación oficial con los artistas, sus representantes o discográficas. Los datos de sueldo, aforo y directo son ficticios y solo sirven para la mecánica del juego. Las imágenes son ilustraciones generadas por IA, no fotografías reales. Nombres e imágenes pertenecen a sus respectivos propietarios.</p>
@@ -178,12 +180,17 @@
         <div class="publish-row">
           <input class="publish-input" id="aliasInput" type="text" maxlength="16" spellcheck="false"
                  autocomplete="nickname" data-i18n-placeholder="lb.aliasPlaceholder" placeholder="Tu alias">
-          <select class="publish-select" id="countrySelect" data-i18n-aria="lb.countryLabel" aria-label="País"></select>
+          <div class="publish-select-wrap">
+            <span class="publish-select-flag" id="countryFlagPreview" aria-hidden="true"></span>
+            <select class="publish-select" id="countrySelect" data-i18n-aria="lb.countryLabel" aria-label="País"></select>
+          </div>
         </div>
         <button class="btn btn-gold" id="publishBtn" data-i18n="lb.publishBtn">Publicar en la clasificación</button>
         <p class="publish-msg" id="publishMsg" role="status"></p>
       </div>
       <p class="publish-done" id="lbPublishedMsg" role="status" hidden></p>
+
+      <button class="btn btn-secondary lb-entry-btn" id="resultLeaderboardBtn" hidden data-i18n="lb.viewBtn">🏆 Ver clasificación</button>
 
       <div class="poster-preview" id="posterPreviewBox">
         <img id="posterImg" alt="Póster de tu cartel" data-i18n-alt="result.posterAlt">
@@ -191,7 +198,6 @@
           <a class="btn btn-gold" id="posterDownloadLink" download="mi-cartel.png" data-i18n="result.downloadBtn">⬇️ Descargar imagen</a>
           <button class="btn btn-secondary" id="posterShareBtn" style="display:none" data-i18n="result.shareBtn">📲 Compartir imagen</button>
           <button class="btn btn-secondary" id="playAgainBtn" data-i18n="result.playAgainBtn">🔄 Jugar de nuevo</button>
-          <button class="btn btn-secondary" id="resultLeaderboardBtn" hidden data-i18n="lb.viewBtn">🏆 Ver clasificación</button>
           <a class="btn btn-secondary" id="suggestionLink" href="mailto:armatucartel@gmail.com?subject=Sugerencia%20-%20Arma%20tu%20Cartel" data-i18n="result.suggestionBtn">📧 Enviar sugerencia</a>
         </div>
       </div>
