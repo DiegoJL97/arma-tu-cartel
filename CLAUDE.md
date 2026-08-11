@@ -184,7 +184,7 @@ Se valoró cambiar el nombre pero se decidió **mantener "Arma tu Cartel"**. Pun
 
 **Antes de lanzamiento público (pendiente):**
 - ~~Meta tags Open Graph + favicon + meta description~~ — **hecho**: description, OG, Twitter Card, favicon (emoji 🎪 provisional), theme-color y `og-image.jpg` (1200x630, generado por Canvas a partir de los assets reales) en `public/index.html`.
-- ~~Analítica básica y respetuosa con privacidad~~ — **hecho**: GoatCounter (sitio `armatucartel`, sin cookies, sin banner de consentimiento). Script en `public/index.html`. Eventos custom vía `trackEvent()` en `public/js/app.js`: `game-started` (startGame), `game-completed` (showResult), `poster-downloaded` (click en posterDownloadLink).
+- ~~Analítica básica y respetuosa con privacidad~~ — **hecho**: GoatCounter (sitio `armatucartel`, sin cookies, sin banner de consentimiento). Script en `public/index.html`. Eventos custom vía `trackEvent()` en `public/js/app.js`: `game-started` (startGame), `game-completed` (showResult), `poster-downloaded` (click en posterDownloadLink), `coffee-click` (click en el enlace de donación, ver "Monetización").
 - Pasada de QA visual en navegadores/dispositivos reales — **nunca hecha**.
 - ~~Aviso legal dentro de la propia app~~ — **hecho**: párrafo `.hero-disclaimer` al final de la pantalla de inicio (bajo el botón de empezar), bilingüe vía `landing.disclaimer`. Cubre: juego de fans sin relación oficial con artistas/representantes/discográficas, datos ficticios, imágenes generadas por IA (no fotos reales), y propiedad de nombres e imágenes. Estilo deliberadamente discreto (11px, `--muted`, opacidad 0.75).
 
@@ -218,3 +218,7 @@ Se valoró cambiar el nombre pero se decidió **mantener "Arma tu Cartel"**. Pun
 ## Contacto / branding en el propio juego
 
 Botón de sugerencias en la pantalla de resultado → `mailto:armatucartel@gmail.com`. El asunto del email cambia según el idioma activo.
+
+## Monetización
+
+Botón de donación (`#coffeeLink`) en la pantalla de resultado, junto al de sugerencias → Ko-fi de Diego (`https://ko-fi.com/diegojaralopez`), `target="_blank"`. Se eligió Ko-fi sobre Buy Me a Coffee por su comisión (0% de plataforma, solo la del procesador de pago, frente al 5% extra de BMC). Evento de analítica `coffee-click` al pulsarlo (mismo patrón que `poster-downloaded`). Es la única vía de monetización del proyecto por ahora; se descartó meter anuncios (choca con la analítica sin cookies ya elegida) y vender el póster como producto físico (subiría el perfil legal: pasaría de "juego de fans con imágenes de IA" a vender un producto comercial con nombres/imágenes de artistas reales, justo lo que el disclaimer del landing dice que se evita).

@@ -84,7 +84,8 @@ import * as Engine from './engine.js';
         downloadBtn: '⬇️ Descargar imagen',
         shareBtn: '📲 Compartir imagen',
         playAgainBtn: '🔄 Jugar de nuevo',
-        suggestionBtn: '📧 Enviar sugerencia'
+        suggestionBtn: '📧 Enviar sugerencia',
+        coffeeBtn: '☕ Invítame a un café'
       },
       mailto: { subject: 'Sugerencia - Arma tu Cartel' },
       poster: { title: 'ARMA TU CARTEL' },
@@ -192,7 +193,8 @@ import * as Engine from './engine.js';
         downloadBtn: '⬇️ Download image',
         shareBtn: '📲 Share image',
         playAgainBtn: '🔄 Play again',
-        suggestionBtn: '📧 Send feedback'
+        suggestionBtn: '📧 Send feedback',
+        coffeeBtn: '☕ Buy me a coffee'
       },
       mailto: { subject: 'Suggestion - Build Your Lineup' },
       poster: { title: 'BUILD YOUR LINEUP' },
@@ -1901,6 +1903,10 @@ import * as Engine from './engine.js';
 
   document.getElementById('posterDownloadLink').addEventListener('click', function(){
     trackEvent('poster-downloaded');
+  });
+
+  document.getElementById('coffeeLink').addEventListener('click', function(){
+    trackEvent('coffee-click');
   });
 
   document.getElementById('posterShareBtn').addEventListener('click', function(){

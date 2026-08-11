@@ -979,7 +979,7 @@
        un ancho, lo que dejaba "compartir" y "jugar de nuevo" enormes. */
     .poster-preview-actions{ display:flex; flex-direction:row; flex-wrap:wrap; gap:8px; }
     .poster-preview-actions .btn{ flex:1 1 130px; padding:12px 8px; font-size:13px; white-space:nowrap; }
-    #posterDownloadLink, #suggestionLink{ flex-basis:100%; }
+    #posterDownloadLink, #suggestionLink, #coffeeLink{ flex-basis:100%; }
     /* Misma altura que los botones de arriba, aunque viva fuera de ese grupo. */
     .lb-entry-btn{ padding:12px 8px; font-size:13px; margin-bottom:12px; }
 
