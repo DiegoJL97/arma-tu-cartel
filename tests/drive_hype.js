@@ -6,9 +6,24 @@ const root = path.join(__dirname, '..', 'public');
 let html = fs.readFileSync(path.join(root, 'index.html'), 'utf-8');
 const css = fs.readFileSync(path.join(root, 'css', 'styles.css'), 'utf-8');
 const js = fs.readFileSync(path.join(root, 'js', 'app.js'), 'utf-8');
+const engine = fs.readFileSync(path.join(root, 'js', 'engine.js'), 'utf-8');
+// jsdom, construido desde un string en memoria (sin resourceLoader real),
+// no resuelve el import de engine.js de un <script type="module">. Para el
+// test se aplana a un global: se despoja el "export" de engine.js y se
+// vuelca todo en window.Engine, y en app.js se cambia el import por una
+// referencia a ese global. En el navegador real (y en el Worker) siguen
+// siendo modulos ES de verdad, esto es solo un andamiaje del test.
+const engineExports = [
+  'ARTISTS', 'TOTAL_ROUNDS', 'BUDGET', 'GENRE_COUNT', 'SIM_EVENTS',
+  'SIM_POSITIVE_KEYS', 'SIM_NEGATIVE_KEYS', 'createRng', 'generateSeed',
+  'shuffleWithRng', 'rollEventKeyWithRng', 'buildSimOrder', 'computeFinalScore', 'playGame'
+];
+const engineFlat = engine.replace(/^export (const|function) /gm, '$1 ') +
+  '\nwindow.Engine = { ' + engineExports.join(', ') + ' };\n';
+const jsNoImport = js.replace(/^import \* as Engine from '\.\/engine\.js';\s*\n/, 'var Engine = window.Engine;\n');
 html = html
   .replace('<link rel="stylesheet" href="css/styles.css">', () => `<style>${css}</style>`)
-  .replace('<script src="js/app.js"></script>', () => `<script>${js}</script>`);
+  .replace('<script type="module" src="js/app.js"></script>', () => `<script>${engineFlat}</script><script>${jsNoImport}</script>`);
 const dom = new JSDOM(html, { runScripts: 'dangerously', pretendToBeVisual: true, url: 'http://localhost/' });
 const { window } = dom;
 

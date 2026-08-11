@@ -2,18 +2,21 @@
  * Arma tu Cartel — API de la clasificacion (Cloudflare Worker + D1)
  *
  *   GET  /api/leaderboard?scope=week|global&limit=10&client=<uuid>
- *   POST /api/score        { alias, country, score, genres, attendance, lineup, clientId }
+ *   POST /api/score        { alias, country, seed, picks, decisions, clientId }
  *
- * Fase 1: la puntuacion la calcula el cliente y aqui solo se valida que sea
- * coherente. La columna `verified` queda a 0. En la fase 2, cuando el juego
- * use un RNG con semilla, este Worker recalculara la puntuacion a partir de
- * (seed, lineup) y marcara verified=1; las filas de fase 1 se podran purgar
- * sin tirar la tabla.
+ * Fase 2: el cliente ya no manda la puntuacion. Manda la semilla de la
+ * partida y las elecciones del jugador (picks/decisions), y este Worker
+ * reproduce la partida entera con el mismo motor que el cliente
+ * (public/js/engine.js, importado tal cual, sin duplicar logica) para
+ * calcular la puntuacion de verdad. Todas las filas nuevas quedan con
+ * verified=1; las de fase 1 (score auto-declarado) se quedan como estan.
  *
  * Variables de entorno:
  *   IP_SALT       sal para hashear la IP (obligatoria, wrangler secret put)
  *   ALLOW_ORIGINS lista separada por comas; '*' para abrir del todo
  */
+
+import * as Engine from '../public/js/engine.js';
 
 const MAX_ALIAS = 16;
 const TOP_LIMIT_MAX = 50;
@@ -208,11 +211,20 @@ async function postScore(request, env) {
 
   const alias = sanitizeAlias(body.alias);
   const country = sanitizeCountry(body.country);
-  const score = intInRange(body.score, 0, 100, 'score');
-  const genres = intInRange(body.genres, 1, 8, 'genres');
-  const attendance = intInRange(body.attendance, 0, 1000000, 'attendance');
+  const seed = sanitizeSeed(body.seed);
+  const picks = sanitizePicks(body.picks);
+  const decisions = sanitizeDecisions(body.decisions);
   const clientId = sanitizeClientId(body.clientId);
-  const lineup = sanitizeLineup(body.lineup);
+
+  // Reproduce la partida entera server-side: la puntuacion, generos,
+  // asistencia y lineup salen todos de aqui, nunca de lo que mande el
+  // cliente.
+  let result;
+  try {
+    result = Engine.playGame(seed, picks, decisions);
+  } catch (e) {
+    throw new ApiError(400, 'bad_game', e.message);
+  }
 
   const ipHash = await hashIp(request.headers.get('CF-Connecting-IP') || '', env.IP_SALT);
   await enforceRateLimits(env, clientId, ipHash);
@@ -221,10 +233,10 @@ async function postScore(request, env) {
   await env.DB.prepare(
     `INSERT INTO scores
        (alias, country, score, genres, attendance, lineup, seed, verified, client_id, ip_hash, created_at, iso_week)
-     VALUES (?1, ?2, ?3, ?4, ?5, ?6, NULL, 0, ?7, ?8, ?9, ?10)`
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 1, ?8, ?9, ?10, ?11)`
   ).bind(
-    alias, country, score, genres, attendance,
-    lineup ? JSON.stringify(lineup) : null,
+    alias, country, result.score, result.genres, result.attendance,
+    JSON.stringify(result.lineupNames), seed,
     clientId, ipHash, now.toISOString(), isoWeekOf(now)
   ).run();
 
@@ -302,23 +314,36 @@ function sanitizeClientId(value) {
   return id;
 }
 
-function sanitizeLineup(value) {
-  if (value == null) return null;
-  if (!Array.isArray(value) || value.length !== 10) throw new ApiError(400, 'bad_lineup');
-  return value.map(name => {
-    if (typeof name !== 'string' || !name.trim() || name.length > 60) {
-      throw new ApiError(400, 'bad_lineup');
-    }
-    return name.trim();
+function sanitizeSeed(value) {
+  if (typeof value !== 'string') throw new ApiError(400, 'bad_seed');
+  const seed = value.trim();
+  if (!seed || seed.length > 64) throw new ApiError(400, 'bad_seed');
+  return seed;
+}
+
+// Rango de tarjeta (0..2): la validacion exacta contra la partida real
+// (indice fuera de las opciones disponibles esa ronda) la hace playGame().
+function sanitizePicks(value) {
+  if (!Array.isArray(value) || value.length !== Engine.TOTAL_ROUNDS) {
+    throw new ApiError(400, 'bad_picks');
+  }
+  return value.map(n => {
+    if (!Number.isInteger(n) || n < 0 || n > 2) throw new ApiError(400, 'bad_picks');
+    return n;
   });
 }
 
-function intInRange(value, min, max, field) {
-  const n = typeof value === 'number' ? value : parseInt(value, 10);
-  if (!Number.isInteger(n) || n < min || n > max) {
-    throw new ApiError(400, 'bad_' + field);
+// Cuantas decisiones hacen falta (y el rango exacto de cada una) lo decide
+// la partida real dentro de playGame(); aqui solo se descarta basura obvia.
+function sanitizeDecisions(value) {
+  if (value == null) return [];
+  if (!Array.isArray(value) || value.length > Engine.TOTAL_ROUNDS) {
+    throw new ApiError(400, 'bad_decisions');
   }
-  return n;
+  return value.map(n => {
+    if (!Number.isInteger(n) || n < 0 || n > 9) throw new ApiError(400, 'bad_decisions');
+    return n;
+  });
 }
 
 async function hashIp(ip, salt) {

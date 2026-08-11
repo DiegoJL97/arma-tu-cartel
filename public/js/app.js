@@ -1,3 +1,5 @@
+import * as Engine from './engine.js';
+
 (function(){
 
   /* ---------- analytics ---------- */
@@ -270,126 +272,23 @@
     return (GENRE_LABELS[currentLang] && GENRE_LABELS[currentLang][g]) || g;
   }
 
-  var ARTISTS = [
-    {name:"Bad Bunny", genre:"Reggaetón", country:"PR", salary:14.0, attendance:85000, live:97},
-    {name:"J Balvin", genre:"Urbano Pop", country:"CO", salary:9.5, attendance:65000, live:86},
-    {name:"Daddy Yankee", genre:"Vieja Escuela", country:"PR", salary:9.0, attendance:60000, live:92},
-    {name:"Karol G", genre:"Urbano Pop", country:"CO", salary:9.0, attendance:60000, live:88},
-    {name:"Rauw Alejandro", genre:"Urbano Pop", country:"PR", salary:7.5, attendance:48500, live:85},
-    {name:"Ozuna", genre:"Reggaetón Romántico", country:"PR", salary:6.0, attendance:45000, live:80},
-    {name:"Farruko", genre:"Reggaetón", country:"PR", salary:4.5, attendance:32000, live:70},
-    {name:"Don Omar", genre:"Vieja Escuela", country:"PR", salary:7.0, attendance:50000, live:80},
-    {name:"Anuel AA", genre:"Trap", country:"PR", salary:6.0, attendance:43000, live:77},
-    {name:"Myke Towers", genre:"Trap", country:"PR", salary:5.5, attendance:38000, live:77},
-    {name:"Manuel Turizo", genre:"Urbano Pop", country:"CO", salary:4.5, attendance:35000, live:70},
-    {name:"Feid", genre:"Reggaetón", country:"CO", salary:6.0, attendance:45000, live:79},
-    {name:"Nicky Jam", genre:"Vieja Escuela", country:"PR", salary:4.0, attendance:33000, live:75},
-    {name:"Quevedo", genre:"Reggaetón", country:"ES", salary:4.5, attendance:35500, live:77},
-    {name:"Becky G", genre:"Urbano Pop", country:"US", salary:3.5, attendance:30000, live:75},
-    {name:"Jhayco", genre:"Trap", country:"PR", salary:4.5, attendance:35000, live:75},
-    {name:"Zion & Lennox", genre:"Vieja Escuela", country:"PR", salary:2.5, attendance:25000, live:68},
-    {name:"Arcángel", genre:"Trap", country:"PR", salary:3.5, attendance:30000, live:79},
-    {name:"Chencho Corleone", genre:"Vieja Escuela", country:"PR", salary:3.0, attendance:28000, live:70},
-    {name:"Ñengo Flow", genre:"Trap", country:"PR", salary:2.5, attendance:25000, live:74},
-    {name:"El Alfa", genre:"Dembow", country:"DO", salary:2.5, attendance:27500, live:74},
-    {name:"De La Ghetto", genre:"Reggaetón", country:"PR", salary:2.0, attendance:22000, live:70},
-    {name:"Sech", genre:"Urbano Pop", country:"PA", salary:2.0, attendance:22000, live:74},
-    {name:"Justin Quiles", genre:"Reggaetón Romántico", country:"PR", salary:2.0, attendance:22000, live:68},
-    {name:"Eladio Carrión", genre:"Trap", country:"PR", salary:3.5, attendance:29000, live:80},
-    {name:"Darell", genre:"Reggaetón", country:"PR", salary:1.5, attendance:18000, live:65},
-    {name:"Tito El Bambino", genre:"Vieja Escuela", country:"PR", salary:1.5, attendance:18000, live:68},
-    {name:"Natti Natasha", genre:"Reggaetón Romántico", country:"DO", salary:2.0, attendance:22000, live:71},
-    {name:"Cosculluela", genre:"Trap", country:"PR", salary:1.5, attendance:14000, live:70},
-    {name:"Dalex", genre:"Reggaetón Romántico", country:"PR", salary:1.0, attendance:12500, live:58},
-    {name:"Bad Gyal", genre:"Urbano Pop", country:"ES", salary:2.5, attendance:23000, live:74},
-    {name:"Lunay", genre:"Reggaetón Romántico", country:"PR", salary:1.0, attendance:14000, live:60},
-    {name:"Tokischa", genre:"Dembow", country:"DO", salary:1.0, attendance:15000, live:65},
-    {name:"Ivy Queen", genre:"Vieja Escuela", country:"PR", salary:1.5, attendance:16333, live:73},
-    {name:"Chimbala", genre:"Dembow", country:"DO", salary:0.5, attendance:14000, live:60},
-    {name:"Yailin", genre:"Dembow", country:"DO", salary:0.5, attendance:5500, live:48},
-    {name:"Alexis y Fido", genre:"Vieja Escuela", country:"PR", salary:1.0, attendance:12000, live:57},
-    {name:"Maldy", genre:"Vieja Escuela", country:"PR", salary:0.5, attendance:12000, live:60},
-    {name:"Omega El Fuerte", genre:"Dembow", country:"DO", salary:0.5, attendance:6000, live:59},
-    {name:"Maluma", genre:"Urbano Pop", country:"CO", salary:6.5, attendance:50000, live:80},
-    {name:"Anitta", genre:"Urbano Pop", country:"BR", salary:4.0, attendance:32500, live:78},
-    {name:"Ovy On The Drums", genre:"Productores", country:"CO", salary:1.5, attendance:16500, live:70},
-    {name:"Beéle", genre:"Urbano Pop", country:"CO", salary:3.5, attendance:31000, live:74},
-    {name:"Cris Mj", genre:"Reggaetón", country:"CL", salary:3.0, attendance:30000, live:70},
-    {name:"Omar Courtz", genre:"Nueva Escuela", country:"PR", salary:4.0, attendance:29000, live:76},
-    {name:"Ryan Castro", genre:"Reggaetón", country:"CO", salary:3.5, attendance:28500, live:70},
-    {name:"Danny Ocean", genre:"Urbano Pop", country:"VE", salary:3.0, attendance:28000, live:66},
-    {name:"Bizarrap", genre:"Productores", country:"AR", salary:4.5, attendance:38000, live:81},
-    {name:"Tainy", genre:"Productores", country:"PR", salary:2.0, attendance:16000, live:75},
-    {name:"Yandel", genre:"Vieja Escuela", country:"PR", salary:3.5, attendance:27000, live:78},
-    {name:"Blessd", genre:"Reggaetón", country:"CO", salary:2.0, attendance:18000, live:70},
-    {name:"El Bogueto", genre:"Reggaetón", country:"MX", salary:1.0, attendance:15000, live:63},
-    {name:"Jay Wheeler", genre:"Reggaetón Romántico", country:"PR", salary:3.0, attendance:22000, live:76},
-    {name:"Rels B", genre:"Urbano Pop", country:"ES", salary:3.0, attendance:28000, live:72},
-    {name:"Kapo", genre:"Urbano Pop", country:"CO", salary:2.0, attendance:24000, live:67},
-    {name:"Young Miko", genre:"Nueva Escuela", country:"PR", salary:3.0, attendance:26500, live:73},
-    {name:"Zion", genre:"Vieja Escuela", country:"PR", salary:2.0, attendance:17500, live:68},
-    {name:"Lenny Tavárez", genre:"Reggaetón Romántico", country:"PR", salary:2.0, attendance:17000, live:69},
-    {name:"Jowell & Randy", genre:"Vieja Escuela", country:"PR", salary:2.5, attendance:20000, live:74},
-    {name:"Yung Beef", genre:"Trap", country:"ES", salary:1.0, attendance:16000, live:64},
-    {name:"Wisin", genre:"Vieja Escuela", country:"PR", salary:3.0, attendance:24500, live:71},
-    {name:"Dei V", genre:"Nueva Escuela", country:"PR", salary:3.0, attendance:28000, live:68},
-    {name:"Mora", genre:"Nueva Escuela", country:"PR", salary:4.0, attendance:30500, live:78},
-    {name:"Noriel", genre:"Trap", country:"PR", salary:1.5, attendance:16000, live:61},
-    {name:"De La Rose", genre:"Trap", country:"PR", salary:2.5, attendance:23000, live:68},
-    {name:"Paulo Londra", genre:"Trap", country:"AR", salary:3.0, attendance:26000, live:72},
-    {name:"Maria Becerra", genre:"Urbano Pop", country:"AR", salary:3.0, attendance:29000, live:75},
-    {name:"Cazzu", genre:"Trap", country:"AR", salary:1.5, attendance:18000, live:70},
-    {name:"Bryant Myers", genre:"Trap", country:"PR", salary:1.5, attendance:18500, live:66},
-    {name:"TINI", genre:"Urbano Pop", country:"AR", salary:3.0, attendance:28500, live:75},
-    {name:"Caleb Calloway", genre:"Productores", country:"PR", salary:1.0, attendance:12000, live:65},
-    {name:"Randy", genre:"Vieja Escuela", country:"PR", salary:2.0, attendance:19500, live:70},
-    {name:"Duki", genre:"Trap", country:"AR", salary:4.0, attendance:33500, live:77},
-    {name:"Nicki Nicole", genre:"Urbano Pop", country:"AR", salary:2.0, attendance:21500, live:73},
-    {name:"Luar La L", genre:"Trap", country:"PR", salary:1.5, attendance:15500, live:65},
-    {name:"Emilia", genre:"Urbano Pop", country:"AR", salary:3.0, attendance:25500, live:74},
-    {name:"Boza", genre:"Reggaetón", country:"PA", salary:1.0, attendance:12500, live:62},
-    {name:"Lyanno", genre:"Reggaetón Romántico", country:"PR", salary:1.0, attendance:15000, live:63},
-    {name:"Trueno", genre:"Trap", country:"AR", salary:2.5, attendance:22500, live:73},
-    {name:"Morad", genre:"Trap", country:"ES", salary:1.5, attendance:19000, live:66},
-    {name:"Brray", genre:"Trap", country:"PR", salary:1.0, attendance:14000, live:61},
-    {name:"Jory Boy", genre:"Vieja Escuela", country:"PR", salary:1.0, attendance:12000, live:59},
-    {name:"Nio García", genre:"Reggaetón", country:"PR", salary:1.0, attendance:16000, live:62},
-    {name:"Clarent", genre:"Trap", country:"ES", salary:1.5, attendance:15500, live:61},
-    {name:"Alvaro Diaz", genre:"Urbano Pop", country:"PR", salary:2.5, attendance:19500, live:74},
-    {name:"Guaynaa", genre:"Reggaetón", country:"PR", salary:1.0, attendance:15000, live:60},
-    {name:"Villano Antillano", genre:"Trap", country:"PR", salary:1.0, attendance:18000, live:66},
-    {name:"El Cherry Scom", genre:"Dembow", country:"DO", salary:0.5, attendance:12000, live:55},
-    {name:"Kevin Roldan", genre:"Reggaetón", country:"CO", salary:0.5, attendance:12000, live:56},
-    {name:"Miky Woodz", genre:"Trap", country:"PR", salary:1.0, attendance:15000, live:62},
-    {name:"Rochy RD", genre:"Dembow", country:"DO", salary:0.5, attendance:14000, live:56},
-    {name:"Saiko", genre:"Urbano Pop", country:"ES", salary:2.5, attendance:22750, live:70},
-    {name:"Mozart La Para", genre:"Dembow", country:"DO", salary:0.5, attendance:12000, live:55},
-    {name:"Juanka", genre:"Trap", country:"PR", salary:0.5, attendance:9000, live:51},
-    {name:"Gigolo y La Exce", genre:"Vieja Escuela", country:"PR", salary:0.5, attendance:7000, live:59},
-    {name:"Beny Jr", genre:"Trap", country:"ES", salary:1.0, attendance:15000, live:61},
-    {name:"Fuego", genre:"Reggaetón", country:"DO", salary:0.5, attendance:8000, live:50},
-    {name:"Almighty", genre:"Trap", country:"PR", salary:1.0, attendance:14500, live:62},
-    {name:"Nacho", genre:"Reggaetón Romántico", country:"VE", salary:1.5, attendance:14000, live:64},
-    {name:"J Álvarez", genre:"Vieja Escuela", country:"PR", salary:1.5, attendance:14000, live:67},
-    {name:"Casper Mágico", genre:"Reggaetón", country:"PR", salary:1.0, attendance:13500, live:56},
-    {name:"Kendo Kaponi", genre:"Vieja Escuela", country:"PR", salary:1.5, attendance:13500, live:63},
-    {name:"Baby Rasta y Gringo", genre:"Vieja Escuela", country:"PR", salary:1.0, attendance:11000, live:62},
-    {name:"Khea", genre:"Trap", country:"AR", salary:1.5, attendance:18000, live:63},
-    {name:"DJ Luian", genre:"Productores", country:"PR", salary:1.0, attendance:8500, live:55},
-    {name:"Farina", genre:"Urbano Pop", country:"CO", salary:1.0, attendance:7500, live:60},
-    {name:"Franco El Gorila", genre:"Reggaetón", country:"PR", salary:1.0, attendance:11000, live:56},
-    {name:"Corina Smith", genre:"Urbano Pop", country:"VE", salary:1.0, attendance:10000, live:65}
-  ];
+  var ARTISTS = Engine.ARTISTS;
 
   var AVATAR_COLORS = ["#FF2E93", "#00E5C7", "#FFB800", "#8C6BFF", "#FF6B4A"];
-  var TOTAL_ROUNDS = 10;
-  var BUDGET = 30; // $M — objetivo: gastarlo todo sin pasarte
+  // TOTAL_ROUNDS/BUDGET/GENRE_COUNT/SIM_EVENTS/ARTISTS viven en engine.js:
+  // es la unica fuente de verdad, el Worker importa exactamente lo mismo.
+  var TOTAL_ROUNDS = Engine.TOTAL_ROUNDS;
+  var BUDGET = Engine.BUDGET;
 
   var state = {
     pool: [],
     lineup: [],
     round: 1,
-    currentChoices: []
+    currentChoices: [],
+    seed: null,   // identifica la partida; el servidor la usa para reproducirla
+    rng: null,    // generador con semilla, UNA sola instancia por partida
+    picks: [],    // que tarjeta (0/1/2) se eligio en cada ronda
+    decisions: [] // que opcion se eligio en cada evento de decision, en orden
   };
 
   /* ---------- SOCIAL NOTIFICATIONS ---------- */
@@ -698,15 +597,6 @@
       '</div>';
   }
 
-  function shuffle(arr){
-    var a = arr.slice();
-    for(var i = a.length - 1; i > 0; i--){
-      var j = Math.floor(Math.random() * (i+1));
-      var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
-    }
-    return a;
-  }
-
   /* ---------- screens ---------- */
   function showScreen(id){
     document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
@@ -731,9 +621,16 @@
   /* ---------- game logic ---------- */
   function startGame(){
     trackEvent('game-started');
-    state.pool = shuffle(ARTISTS);
+    // Una sola instancia de rng por partida: la crea el barajado y la
+    // reutiliza intacta la simulacion despues (startSimulation), para que
+    // la secuencia de numeros sea identica a la que reproduce el servidor.
+    state.seed = Engine.generateSeed();
+    state.rng = Engine.createRng(state.seed);
+    state.pool = Engine.shuffleWithRng(ARTISTS, state.rng);
     state.lineup = [];
     state.round = 1;
+    state.picks = [];
+    state.decisions = [];
     state.hypeFinal = 40;
     notifSentiment = 0;
     clearTimeout(simState.timer);
@@ -854,12 +751,12 @@
   function renderChoices(){
     var grid = document.getElementById('choiceGrid');
     grid.innerHTML = '';
-    state.currentChoices.forEach(function(artist){
+    state.currentChoices.forEach(function(artist, idx){
       var card = document.createElement('button');
       card.className = 'choice-card';
       card.setAttribute('aria-label', t('aria.elegir') + ' ' + artist.name);
       card.innerHTML = choiceCardMarkup(artist);
-      card.addEventListener('click', function(){ pickArtist(artist); });
+      card.addEventListener('click', function(){ pickArtist(artist, idx); });
       grid.appendChild(card);
     });
   }
@@ -879,7 +776,8 @@
       '</div>';
   }
 
-  function pickArtist(artist){
+  function pickArtist(artist, choiceIndex){
+    state.picks.push(choiceIndex);
     state.lineup.push(artist);
     renderSidebar();
     renderBudget();
@@ -944,61 +842,14 @@
     return Math.max(SIM_MIN_READ_MS, Math.min(SIM_MAX_READ_MS, text.length * SIM_MS_PER_CHAR));
   }
 
-  var simState = { order: [], index: 0, hype: 40, timer: null };
+  var simState = { order: [], plan: [], index: 0, hype: 40, timer: null };
 
-  var SIM_EVENTS = {
-    artistLate: { sentiment:'negative', text:{ es:'{name} sale con 10 minutos de retraso.', en:'{name} comes on 10 minutes late.' }, delta:-6 },
-    technicalFail: {
-      sentiment:'negative', decision:true,
-      text:{ es:'Falla el sonido justo en pleno estribillo. El técnico pide unos minutos.', en:'The sound cuts out right in the middle of the chorus. The tech asks for a few minutes.' },
-      options: [
-        { label:{ es:'Parar 5 min', en:'Stop for 5 min' }, delta:-4, resultText:{ es:'Paran el show, lo arreglan y retoman con el público algo frío.', en:"They stop the show, fix it, and come back to a crowd that's cooled off a bit." } },
-        { label:{ es:'Seguir adelante', en:'Push through' }, delta:-10, resultText:{ es:'Siguen con el fallo de fondo, el público se queja.', en:'They push on with the glitch in the background, the crowd complains.' } }
-      ]
-    },
-    powerCut: { sentiment:'negative', text:{ es:'Corte de luz de unos segundos en pleno show.', en:'A few seconds of power outage mid-show.' }, delta:-8 },
-    entranceJam: { sentiment:'negative', text:{ es:'Problemas de aforo en la entrada retrasan el arranque.', en:'Capacity issues at the entrance delay the start.' }, delta:-5 },
-    rainStorm: { sentiment:'negative', text:{ es:'Un diluvio cae a mitad de show y el sonido se resiente.', en:'A downpour hits mid-show and the sound takes a hit.' }, delta:-7 },
-    egoClash: {
-      sentiment:'negative', decision:true, needsOther:true,
-      text:{ es:'Pelea de egos entre {name} y {other} en backstage, se nota la tensión en el escenario.', en:'An ego clash between {name} and {other} backstage, and the tension shows onstage.' },
-      options: [
-        { label:{ es:'Calmar los ánimos', en:'Smooth things over' }, delta:-5, resultText:{ es:'Se calman las cosas, el show sigue algo tocado.', en:'Things calm down, but the show is a bit shaken.' } },
-        { label:{ es:'Dejar que estalle', en:'Let it blow up' }, delta:-13, resultText:{ es:'La tensión se nota demasiado y el show se resiente.', en:'The tension is too obvious and the show suffers.' } }
-      ]
-    },
-    viralMoment: {
-      sentiment:'positive', decision:true,
-      text:{ es:'Un momento de {name} se hace viral en redes al instante.', en:'A moment from {name} goes viral online instantly.' },
-      options: [
-        { label:{ es:'Compartirlo ya', en:'Share it now' }, delta:8, resultText:{ es:'Lo comparten en el momento, el hype sube rápido pero se diluye para el resto del show.', en:'They share it right away, hype spikes fast but fades for the rest of the show.' } },
-        { label:{ es:'Esperar el mejor momento', en:'Wait for the best moment' }, delta:12, resultText:{ es:'Esperan al momento justo para soltarlo y el efecto es mucho mayor.', en:'They wait for the perfect moment to drop it and the effect is much bigger.' } }
-      ]
-    },
-    crowdSings: { sentiment:'positive', text:{ es:'El público corea cada palabra del tema principal.', en:'The crowd sings along to every word of the headline track.' }, delta:7 },
-    perfectNight: { sentiment:'positive', text:{ es:'Noche despejada, sonido perfecto, todo encaja.', en:'Clear night, perfect sound, everything clicks.' }, delta:5 },
-    rainStops: { sentiment:'positive', text:{ es:'Empieza a llover pero para justo a tiempo para el show.', en:'It starts raining but stops just in time for the show.' }, delta:4 },
-    surpriseCollab: { sentiment:'positive', needsOther:true, text:{ es:'{name} invita a {other} a subir al escenario por sorpresa.', en:'{name} brings {other} onstage for a surprise collab.' }, delta:8 }
-  };
-
-  var SIM_POSITIVE_KEYS = ['viralMoment', 'crowdSings', 'perfectNight', 'rainStops', 'surpriseCollab'];
-  var SIM_NEGATIVE_KEYS = ['artistLate', 'technicalFail', 'powerCut', 'entranceJam', 'rainStorm', 'egoClash'];
+  var SIM_EVENTS = Engine.SIM_EVENTS;
 
   function simOtherArtistName(){
     var played = simState.order.slice(0, simState.index);
     if(!played.length) return '';
     return pickRandom(played).name;
-  }
-
-  function simRollEventKey(artist, index){
-    if(Math.random() > 0.55) return null;
-    var positiveChance = Math.max(0.30, Math.min(0.80, 0.48 + (artist.live - 55) * 0.008));
-    var sentiment = Math.random() < positiveChance ? 'positive' : 'negative';
-    var pool = (sentiment === 'positive' ? SIM_POSITIVE_KEYS : SIM_NEGATIVE_KEYS).filter(function(key){
-      return !SIM_EVENTS[key].needsOther || index > 0;
-    });
-    if(!pool.length) return null;
-    return pickRandom(pool);
   }
 
   function simArtistCardMarkup(artist){
@@ -1086,7 +937,9 @@
 
     card.querySelectorAll('.sim-event-option').forEach(function(btn){
       btn.addEventListener('click', function(){
-        var opt = def.options[parseInt(btn.getAttribute('data-index'), 10)];
+        var chosenIndex = parseInt(btn.getAttribute('data-index'), 10);
+        var opt = def.options[chosenIndex];
+        state.decisions.push(chosenIndex);
         var totalDelta = baseDelta + opt.delta;
         simApplyHypeDelta(totalDelta);
         card.querySelectorAll('.sim-event-option').forEach(function(b){ b.disabled = true; });
@@ -1182,7 +1035,7 @@
 
   function simRevealEvent(artist){
     var baseDelta = Math.round((artist.live - 50) / 5);
-    var eventKey = simRollEventKey(artist, simState.index);
+    var eventKey = simState.plan[simState.index].eventKey;
     var def = eventKey ? SIM_EVENTS[eventKey] : null;
     var otherName = (def && def.needsOther) ? simOtherArtistName() : '';
 
@@ -1205,10 +1058,21 @@
     while(simState.index < simState.order.length){
       var artist = simState.order[simState.index];
       var baseDelta = Math.round((artist.live - 50) / 5);
-      var eventKey = simRollEventKey(artist, simState.index);
+      var eventKey = simState.plan[simState.index].eventKey;
       var def = eventKey ? SIM_EVENTS[eventKey] : null;
       var totalDelta = baseDelta;
-      if(def){ totalDelta += def.decision ? def.options[0].delta : def.delta; }
+      if(def){
+        if(def.decision){
+          // Saltar sin decidir equivale a elegir siempre la primera opcion
+          // (comportamiento ya existente); se registra igual que si el
+          // jugador la hubiese pulsado, para que el envio al servidor sea
+          // coherente con lo que realmente se aplico.
+          state.decisions.push(0);
+          totalDelta += def.options[0].delta;
+        } else {
+          totalDelta += def.delta;
+        }
+      }
       simState.hype = Math.max(0, Math.min(100, simState.hype + totalDelta));
       simState.index += 1;
     }
@@ -1226,7 +1090,18 @@
   }
 
   function startSimulation(){
-    simState.order = state.lineup.slice().sort(function(a, b){ return a.salary - b.salary; });
+    simState.order = Engine.buildSimOrder(state.lineup);
+    // Los 10 eventos se tiran de golpe aqui, antes de que el jugador pueda
+    // interactuar — no sobre la marcha en cada concierto. Si tirasemos uno
+    // por uno, ver la simulacion completa consumiria numeros del rng en un
+    // orden distinto a saltarla (el confeti/temporizadores no tocan el rng,
+    // pero el propio ritmo de clicks del usuario si podia des-sincronizar
+    // cuando esto se resolvia bajo demanda). Precalculando una unica vez,
+    // ver o saltar leen exactamente el mismo plan, y el servidor reproduce
+    // la misma secuencia sin depender de como haya jugado el usuario.
+    simState.plan = simState.order.map(function(artist, i){
+      return { eventKey: Engine.rollEventKeyWithRng(artist, i, state.rng) };
+    });
     simState.index = 0;
     simState.hype = 40;
     document.getElementById('simBudgetPill').textContent = '💰 ' + fmtMoney(spentSoFar()) + ' / ' + fmtMoney(BUDGET);
@@ -1250,7 +1125,7 @@
     }, 1200);
   }
 
-  var GENRE_COUNT = 8; // + Productores
+  var GENRE_COUNT = Engine.GENRE_COUNT;
 
   function overallLabel(score){
     if(score >= 90) return t('tier.legendario');
@@ -1319,25 +1194,16 @@
 
   function showResult(){
     trackEvent('game-completed');
-    var n = state.lineup.length;
-    var totalAttendance = state.lineup.reduce(function(s,a){ return s + a.attendance; }, 0);
-    var avgLive = Math.round(state.lineup.reduce(function(s,a){ return s + a.live; }, 0) / n);
-    var totalSalary = spentSoFar();
-    var genresUsed = [];
-    state.lineup.forEach(function(a){ if(genresUsed.indexOf(a.genre) === -1) genresUsed.push(a.genre); });
-
-    var attendanceScore = Math.min(100, totalAttendance / 300000 * 100);
-    var liveScore = avgLive;
-    var genreScore = (genresUsed.length / GENRE_COUNT) * 100;
+    // Misma funcion que usa el Worker para verificar la partida (via
+    // engine.js): asi la puntuacion que ves aqui es, por construccion,
+    // la misma que calculara el servidor a partir de tu seed/picks/decisions.
     var hypeScore = (typeof state.hypeFinal === 'number') ? state.hypeFinal : 50;
-    var base = 0.25 * attendanceScore + 0.25 * liveScore + 0.20 * genreScore + 0.30 * hypeScore;
-
-    var overBudget = totalSalary > BUDGET;
-    var budgetAdjustment = overBudget
-      ? -Math.round((totalSalary - BUDGET) * 2.5)
-      : Math.round((totalSalary / BUDGET) * 8);
-
-    var finalScore = Math.max(0, Math.min(100, Math.round(base) + budgetAdjustment));
+    var scored = Engine.computeFinalScore(state.lineup, hypeScore);
+    var totalAttendance = scored.totalAttendance;
+    var avgLive = scored.avgLive;
+    var totalSalary = scored.totalSalary;
+    var overBudget = scored.overBudget;
+    var finalScore = scored.finalScore;
     state.finalScore = finalScore;
     state.finalScoreLabel = overallLabel(finalScore);
 
@@ -1370,7 +1236,7 @@
 
     state.resultStats = {
       hypeScore: hypeScore, avgLive: avgLive, totalAttendance: totalAttendance,
-      genresUsedCount: genresUsed.length, totalSalary: totalSalary, overBudget: overBudget
+      genresUsedCount: scored.genresUsedCount, totalSalary: totalSalary, overBudget: overBudget
     };
 
     refreshResultTexts();
@@ -1581,16 +1447,19 @@
     msg.className = 'publish-msg';
     msg.textContent = t('lb.publishing');
 
+    // Fase 2: ya no se envia la puntuacion (ni genero/asistencia/lineup),
+    // el cliente ya no es la fuente de verdad. Se envia (seed, picks,
+    // decisions) y el Worker reproduce la partida entera con el mismo
+    // engine.js para calcular la puntuacion el mismo.
     lbFetch('/api/score', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         alias: alias,
         country: countryEl.value,
-        score: state.finalScore,
-        genres: state.resultStats.genresUsedCount,
-        attendance: state.resultStats.totalAttendance,
-        lineup: state.lineup.map(function(a){ return a.name; }),
+        seed: state.seed,
+        picks: state.picks,
+        decisions: state.decisions,
         clientId: clientId()
       })
     }).then(function(res){

@@ -10,13 +10,14 @@ Nombre actual: **Arma tu Cartel**. Se decidió mantenerlo (ver sección "Naming 
 
 ## Stack y estructura de ficheros
 
-Vanilla HTML/CSS/JS, sin build step ni dependencias externas en tiempo de ejecución (aparte de Google Fonts por `@import`). **Todo lo publicable vive en `public/`** — es la carpeta que se despliega tal cual; el resto del repo (`api/`, `tests/`, `package.json`...) es herramientas de desarrollo que nunca llegan al navegador. El JS es una única IIFE en `public/js/app.js`.
+Vanilla HTML/CSS/JS, sin build step ni dependencias externas en tiempo de ejecución (aparte de Google Fonts por `@import`). **Todo lo publicable vive en `public/`** — es la carpeta que se despliega tal cual; el resto del repo (`api/`, `tests/`, `package.json`...) es herramientas de desarrollo que nunca llegan al navegador. El JS de cliente es una IIFE en `public/js/app.js` que importa `public/js/engine.js` como módulo ES nativo (ver "Motor de juego compartido" más abajo); `index.html` carga `app.js` con `<script type="module">`.
 
 ```
 public/
   index.html
   css/styles.css
   js/app.js
+  js/engine.js          (motor de juego: datos, RNG con semilla, puntuación — compartido con el Worker)
   robots.txt
   sitemap.xml
   images/
@@ -37,18 +38,28 @@ tests/                   (tests jsdom, leen desde public/)
 
 Antes de una migración antigua todo (incluidas las 108 fotos) iba embebido en base64 dentro del propio HTML, que pesaba ~11,5MB. Ahora el HTML pesa ~12KB y las imágenes se piden bajo demanda (el navegador solo descarga la foto de un artista cuando ese artista se renderiza realmente en pantalla — no hace falta lazy-loading manual, es automático por cómo funciona `background-image: url(...)`).
 
+## Motor de juego compartido (`engine.js`)
+
+`public/js/engine.js` es un módulo ES real (sin build step: el navegador lo carga nativamente, y el Worker lo importa directamente — `wrangler` lo empaqueta con esbuild al desplegar). Es la **única fuente de verdad** para el roster, la tabla de eventos, la fórmula de puntuación y el RNG con semilla; lo importan tanto `app.js` (cliente) como `api/worker.js` (servidor), así que nunca pueden desincronizarse.
+
+Exporta: `ARTISTS` (108 artistas), `TOTAL_ROUNDS`, `BUDGET`, `GENRE_COUNT`, `SIM_EVENTS`, `SIM_POSITIVE_KEYS`/`SIM_NEGATIVE_KEYS`, `createRng(seedStr)`, `generateSeed()`, `shuffleWithRng(arr, rng)`, `rollEventKeyWithRng(artist, index, rng)`, `buildSimOrder(lineup)` (reordena por sueldo ascendente — **no** es el orden de fichaje), `computeFinalScore(lineup, hypeFinal)`, y `playGame(seed, picks, decisions)` (reproducción completa y determinista de una partida, sin UI — la usa el Worker para calcular la puntuación real, ver "Clasificación").
+
+RNG con semilla: **mulberry32** sembrado vía hash FNV-1a de un string legible (`generateSeed()` produce algo como `"c22c2d76"`). Con la misma semilla, la misma secuencia de barajado y de tiradas de eventos sale igual en cualquier máquina. Solo se usa para lo que afecta al resultado (barajar el roster, tirar eventos); el confeti y las notificaciones sociales siguen con `Math.random()` normal a propósito, para no mezclar efectos cosméticos con la reproducibilidad.
+
+`app.js` genera la semilla y el RNG una sola vez por partida en `startGame()` (`state.seed`, `state.rng`), y **reutiliza la misma instancia de RNG** para el barajado inicial y para toda la simulación — crítico para que la reproducción del servidor coincida exactamente. Cada elección de tarjeta se registra en `state.picks` (índice 0/1/2) y cada decisión de evento en `state.decisions`, en el orden en que ocurren. `startSimulation()` precalcula el plan completo de los 10 conciertos **de una vez, al principio**, en vez de tirar cada evento sobre la marcha: así ver la simulación entera o saltarla siempre consumen exactamente las mismas tiradas de RNG y dan el mismo resultado (antes de esto, saltar vs. ver daban partidas distintas porque `simRollEventKey()` se llamaba en dos sitios distintos).
+
 ## Arquitectura del código (dentro del IIFE)
 
 Orden aproximado en el fichero:
 - `TRANSLATIONS`, `t()`, `L()`, `GENRE_LABELS`, `genreLabel()` — sistema de i18n (ver sección dedicada).
-- `ARTISTS` — array de 108 objetos `{name, genre, country, salary, attendance, live}`. `genre` es siempre uno de 8 valores canónicos en español (ver más abajo) y **nunca se traduce en el dato**, solo en su etiqueta mostrada vía `genreLabel()`.
 - `NOTIF_HANDLES`, `NOTIF_MESSAGES` — notificaciones sociales ficticias que reaccionan a las elecciones del jugador. Bilingües: cada mensaje es `{es, en}`.
 - `ARTIST_IMAGES` — dict `nombre artista -> ruta relativa a su foto`.
-- `SIM_EVENTS` — los 10 eventos posibles durante la simulación (algunos con decisión del jugador). Textos bilingües `{es, en}`.
 - Funciones de flujo de juego: `startGame`, `nextRound`, `pickArtist`, `renderChoices`, `choiceCardMarkup`, `renderSidebar`.
 - Funciones de simulación: `startSimulation`, `simPlayNextConcert`, `simRevealEvent`, `simRenderEventAuto`, `simRenderEventDecision`, `simSkip`, `simFinish`.
 - `showResult`, `refreshResultTexts`, `overallLabel`, `generatePoster`, `buildPosterCanvas`, `computePosterLayout` — pantalla de resultado y generación del póster en Canvas.
 - `applyLanguage`, `setLang` — aplican el idioma actual a toda la UI, incluida la regeneración del póster si el idioma se cambia estando ya en la pantalla de resultado.
+
+`ARTISTS`, `SIM_EVENTS`, `BUDGET`, `TOTAL_ROUNDS` y `GENRE_COUNT` ya no viven en `app.js`: son alias a `Engine.ARTISTS` etc. (ver arriba).
 
 ## Sistema de i18n
 
@@ -111,11 +122,16 @@ api/
 
 **Seguridad — leer antes de tocar esto:**
 - El alias lo escriben desconocidos y se muestra a otros usuarios: `lbRowMarkup()` pasa **siempre** por `escapeHtml()`. Verificado con un alias que contiene `<script>`.
-- La puntuación la calcula el cliente, así que **es falsificable**. El Worker solo valida rangos y coherencia, y deja `verified = 0`. La solución real es la fase 2: sustituir `Math.random()` por un RNG con semilla y que el Worker reproduzca la partida desde `(seed, lineup)`. Son ~6 puntos de azar con impacto en el juego (`shuffle` del pool, `simRollEventKey`, el señuelo de notificaciones); el confeti puede seguir sin semilla. Ojo: `simRollEventKey()` se llama dos veces por concierto (en `simRevealEvent` y en el camino de saltar), así que ver o saltar la simulación dan eventos distintos — con semilla habría que unificarlo. Esa misma pieza desbloquea el modo reto diario.
+- ✅ **Fase 2 hecha: puntuación verificada server-side.** El cliente ya no manda `score`/`genres`/`attendance`/`lineup` — manda `{seed, picks, decisions}` (`POST /api/score`), y `worker.js` importa `public/js/engine.js` y llama a `Engine.playGame(seed, picks, decisions)` para reproducir la partida entera y calcular la puntuación de verdad. Toda fila nueva queda con `verified = 1`. Cambio limpio y sin retrocompatibilidad (decisión explícita: solo había datos de prueba en la tabla, sin usuarios reales que romper) — el formato de fase 1 (`score` directo) ahora se rechaza con `bad_seed`. No hay distinción visual en el leaderboard entre filas fase 1 (`verified=0`, ya existentes) y fase 2 (decisión explícita: que se vea igual).
+- Verificado end-to-end: una partida jugada de verdad en navegador (sin saltar, con decisiones reales) se capturó interceptando el `fetch` a `/api/score`, y su `{seed, picks, decisions}` se reprodujo de forma independiente tanto con `Engine.playGame()` en Node como contra `worker.js` corriendo en `wrangler dev --local` — los tres (cliente, replay en Node, Worker) dieron exactamente el mismo resultado (score, hype final, asistencia, géneros). También se probó que el Worker rechaza índices de elección fuera de rango, número incorrecto de decisiones, y el payload viejo de fase 1.
+- La validación de `picks`/`decisions` es de dos capas: `worker.js` descarta basura obvia a nivel de tipo/rango antes de tocar el motor (`sanitizePicks`, `sanitizeDecisions`), y `Engine.playGame()` valida contra la partida real (p. ej. el número exacto de decisiones lo determina la partida, no lo declara el cliente) — un intento de manipular la partida lanza un error y el Worker responde 400.
 - No se guarda la IP en claro, solo `SHA-256(IP + IP_SALT)` para limitar abuso, con una purga sugerida a los 30 días al final de `schema.sql`.
 - El filtro de alias (`BLOCKLIST` en worker.js) es mínimo y hay que ampliarlo.
+- Pendiente, no bloqueante: el modo reto diario (mismo seed para todos cada día) queda desbloqueado por esta misma infraestructura de semilla — ver roadmap.
 
 **Pasos pendientes en Cloudflare** (no se pueden hacer desde el repo): crear la BD, aplicar el esquema, poner el secreto `IP_SALT`, desplegar y pegar la URL en el meta tag. ✅ Ya hecho — API en `https://arma-tu-cartel-api.djara.workers.dev`.
+
+**Desarrollo local del Worker**: `cd api && wrangler dev --local --port 8787` (necesita `api/.dev.vars` con `IP_SALT`, copiado de `.dev.vars.example` — gitignored). Para reiniciar la D1 local: `wrangler d1 execute arma-tu-cartel --local --file=schema.sql`.
 
 ## Despliegue
 
@@ -171,9 +187,9 @@ Se valoró cambiar el nombre pero se decidió **mantener "Arma tu Cartel"**. Pun
 - ~~Aviso legal dentro de la propia app~~ — **hecho**: párrafo `.hero-disclaimer` al final de la pantalla de inicio (bajo el botón de empezar), bilingüe vía `landing.disclaimer`. Cubre: juego de fans sin relación oficial con artistas/representantes/discográficas, datos ficticios, imágenes generadas por IA (no fotos reales), y propiedad de nombres e imágenes. Estilo deliberadamente discreto (11px, `--muted`, opacidad 0.75).
 
 **Corto plazo:**
-- Modo "reto diario" (mismo pool de artistas para todos cada día) — la funcionalidad con más potencial viral identificada, estilo Wordle.
+- Modo "reto diario" (mismo pool de artistas para todos cada día) — la funcionalidad con más potencial viral identificada, estilo Wordle. Ya tiene la infraestructura lista (semilla determinista + replay en servidor de la fase 2 del leaderboard); "misma semilla para todos hoy" es prácticamente gratis con `engine.js` tal como está.
 - Formato de póster vertical 9:16 para Instagram Stories.
-- ~~Leaderboard real~~ — **fase 1 hecha** (ver sección "Clasificación"): API en `api/`, pantalla y bloque de publicar en el cliente. Pendiente: la fase 2 de verificación con semilla.
+- ~~Leaderboard real~~ — **hecho, fases 1 y 2** (ver sección "Clasificación"): API en `api/`, pantalla y bloque de publicar en el cliente, puntuación verificada server-side con motor compartido (`engine.js`) y RNG con semilla.
 
 **Más adelante:**
 - Modo cabeza a cabeza entre dos amigos (draft alternado).
