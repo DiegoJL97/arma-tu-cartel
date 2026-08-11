@@ -28,20 +28,31 @@ Vanilla HTML, CSS y JavaScript. Sin frameworks, sin build step ni dependencias e
 
 ## Estructura del proyecto
 
+Todo lo publicable vive en `public/` — es la carpeta que se despliega tal cual, sin build step. El resto del repo (`api/`, `tests/`, `package.json`...) es herramientas de desarrollo, nunca se sirve al navegador.
+
 ```
+public/
 ├── index.html
+├── css/styles.css
+├── js/app.js
+├── robots.txt
+├── sitemap.xml
 └── images/
     ├── hero-bg.webp
     ├── poster-bg.webp
+    ├── og-image.jpg
+    ├── flags/            (banderas de país para la clasificación)
     └── artists/
         ├── bad-bunny.webp
         ├── j-balvin.webp
         └── ... (108 fotos)
+api/                       (Worker de Cloudflare para la clasificación — ver CLAUDE.md)
+tests/                     (tests jsdom)
 ```
 
 ## Ejecutarlo en local
 
-Hay que servir la carpeta por HTTP — **no abrir `index.html` con doble clic**. Bajo `file://` el navegador trata las imágenes como origen cruzado y "contamina" el canvas del póster, así que `canvas.toDataURL()` lanza un `SecurityError` y la pantalla de resultado se queda sin póster ni botones (descargar, jugar de nuevo...), sin ningún aviso visible más allá de la consola.
+Hay que servir `public/` por HTTP — **no abrir `public/index.html` con doble clic**. Bajo `file://` el navegador trata las imágenes como origen cruzado y "contamina" el canvas del póster, así que `canvas.toDataURL()` lanza un `SecurityError` y la pantalla de resultado se queda sin póster ni botones (descargar, jugar de nuevo...), sin ningún aviso visible más allá de la consola.
 
 Con Node.js instalado, la forma más simple:
 
@@ -52,14 +63,20 @@ npm run serve
 O con Python:
 
 ```bash
-python3 -m http.server 8000
+cd public && python3 -m http.server 8000
 ```
 
 Y abrir `http://localhost:8000` en el navegador.
 
 ## Despliegue
 
-Cualquier hosting de ficheros estáticos sirve: sube la carpeta completa (con `index.html` y `images/` dentro) a Netlify, Vercel, Cloudflare Pages o GitHub Pages. No requiere configuración adicional.
+**Ya está publicado**: [arma-tu-cartel.pages.dev](https://arma-tu-cartel.pages.dev) (Cloudflare Pages, carpeta de build `public/`). El despliegue es manual por ahora — para publicar cambios:
+
+```bash
+wrangler pages deploy public --project-name=arma-tu-cartel --branch=main
+```
+
+Cualquier otro hosting de ficheros estáticos también sirve: sube el contenido de `public/` (no la raíz del repo) a Netlify, Vercel o GitHub Pages. No requiere configuración adicional. La clasificación necesita además el Worker de `api/` — ver `CLAUDE.md`.
 
 ## Sugerencias
 

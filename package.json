@@ -2,7 +2,7 @@
   "name": "arma-tu-cartel",
   "private": true,
   "scripts": {
-    "serve": "node -e \"require('http').createServer((req,res)=>{const fs=require('fs'),path=require('path');let p=path.join(process.cwd(), req.url.split('?')[0]==='/'?'/index.html':req.url.split('?')[0]);const ext=path.extname(p).slice(1);const types={html:'text/html',css:'text/css',js:'application/javascript',webp:'image/webp',png:'image/png'};fs.readFile(p,(err,data)=>{if(err){res.writeHead(404);res.end('not found');return;}res.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream'});res.end(data);});}).listen(8000, ()=>console.log('Arma tu Cartel en http://localhost:8000'))\"",
+    "serve": "node -e \"const root=require('path').join(process.cwd(),'public');require('http').createServer((req,res)=>{const fs=require('fs'),path=require('path');let p=path.join(root, req.url.split('?')[0]==='/'?'/index.html':req.url.split('?')[0]);const ext=path.extname(p).slice(1);const types={html:'text/html',css:'text/css',js:'application/javascript',webp:'image/webp',png:'image/png',jpg:'image/jpeg',txt:'text/plain',xml:'application/xml'};fs.readFile(p,(err,data)=>{if(err){res.writeHead(404);res.end('not found');return;}res.writeHead(200,{'Content-Type':types[ext]||'application/octet-stream'});res.end(data);});}).listen(8000, ()=>console.log('Arma tu Cartel en http://localhost:8000'))\"",
     "test:hype": "node tests/drive_hype.js",
     "test:i18n": "node tests/drive_i18n.js",
     "test": "npm run test:hype && npm run test:i18n"

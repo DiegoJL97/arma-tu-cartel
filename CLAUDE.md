@@ -10,23 +10,32 @@ Nombre actual: **Arma tu Cartel**. Se decidió mantenerlo (ver sección "Naming 
 
 ## Stack y estructura de ficheros
 
-Vanilla HTML/CSS/JS, sin build step ni dependencias externas en tiempo de ejecución. Todo el código vive en un único `index.html` (una IIFE de JS al final del body). Las imágenes van externas (no embebidas), migradas recientemente para reducir el peso de carga:
+Vanilla HTML/CSS/JS, sin build step ni dependencias externas en tiempo de ejecución (aparte de Google Fonts por `@import`). **Todo lo publicable vive en `public/`** — es la carpeta que se despliega tal cual; el resto del repo (`api/`, `tests/`, `package.json`...) es herramientas de desarrollo que nunca llegan al navegador. El JS es una única IIFE en `public/js/app.js`.
 
 ```
-index.html
-images/
-  hero-bg.webp        (fondo de la pantalla de inicio)
-  poster-bg.webp       (fondo del póster generado, 1536x1024 exacto — ver nota abajo)
-  artists/
-    bad-bunny.webp
-    ... (108 fotos, un fichero por artista, slug ascii en minúsculas)
+public/
+  index.html
+  css/styles.css
+  js/app.js
+  robots.txt
+  sitemap.xml
+  images/
+    hero-bg.webp        (fondo de la pantalla de inicio)
+    poster-bg.webp       (fondo del póster generado, 1536x1024 exacto — ver nota abajo)
+    og-image.jpg          (1200x630, para Open Graph/Twitter Card)
+    flags/                (34 banderas de país para la clasificación, ver esa sección)
+    artists/
+      bad-bunny.webp
+      ... (108 fotos, un fichero por artista, slug ascii en minúsculas)
+api/                     (Worker de Cloudflare — ver sección "Clasificación")
+tests/                   (tests jsdom, leen desde public/)
 ```
 
 **Importante sobre `poster-bg.webp`**: el código de generación del póster (`buildPosterCanvas`, `computePosterLayout`) asume que esta imagen mide exactamente `POSTER_BG_SRC_W=1536` x `POSTER_BG_SRC_H=1024` px. Si se sustituye por otra imagen con otras dimensiones, hay que actualizar esas dos constantes (y `POSTER_BG_SCALE = POSTER_WIDTH / POSTER_BG_SRC_W`) o el póster saldrá mal recortado/escalado.
 
-**Requiere servirse por HTTP**, no abrir `index.html` con doble clic. Bajo `file://` las imágenes se cargan como origen cruzado, lo que "contamina" el canvas del póster: `canvas.toDataURL()` en `generatePoster()` (js/app.js) lanza `SecurityError`, y como esa llamada precede a `posterPreviewBox.classList.add('show')`, toda la caja del póster **y sus 4 botones** (descargar, compartir, jugar de nuevo, sugerencia) se quedan en `display:none` sin ningún aviso visible salvo el error en consola. Para probar en local: `npm run serve` (o `python3 -m http.server 8000`) y abrir `http://localhost:8000`.
+**Requiere servirse por HTTP**, no abrir `public/index.html` con doble clic. Bajo `file://` las imágenes se cargan como origen cruzado, lo que "contamina" el canvas del póster: `canvas.toDataURL()` en `generatePoster()` (js/app.js) lanza `SecurityError`, y como esa llamada precede a `posterPreviewBox.classList.add('show')`, toda la caja del póster **y sus 4 botones** (descargar, compartir, jugar de nuevo, sugerencia) se quedan en `display:none` sin ningún aviso visible salvo el error en consola. Para probar en local: `npm run serve` (sirve `public/` en `http://localhost:8000`) o `cd public && python3 -m http.server 8000`.
 
-Antes de esta migración todo (incluidas las 108 fotos) iba embebido en base64 dentro del propio HTML, que pesaba ~11,5MB. Ahora el HTML pesa ~111KB y las imágenes se piden bajo demanda (el navegador solo descarga la foto de un artista cuando ese artista se renderiza realmente en pantalla — no hace falta lazy-loading manual, es automático por cómo funciona `background-image: url(...)`).
+Antes de una migración antigua todo (incluidas las 108 fotos) iba embebido en base64 dentro del propio HTML, que pesaba ~11,5MB. Ahora el HTML pesa ~12KB y las imágenes se piden bajo demanda (el navegador solo descarga la foto de un artista cuando ese artista se renderiza realmente en pantalla — no hace falta lazy-loading manual, es automático por cómo funciona `background-image: url(...)`).
 
 ## Arquitectura del código (dentro del IIFE)
 
@@ -91,7 +100,7 @@ api/
   wrangler.toml   binding de D1 y ALLOW_ORIGINS
 ```
 
-**Interruptor**: la URL del Worker se configura en `index.html` con `<meta name="atc-api-base" content="...">`. **Vacío = clasificación desactivada**: el juego funciona igual y el enlace del inicio, el botón del resultado y el bloque de publicar se ocultan solos (`applyLeaderboardVisibility`). Los tests jsdom corren así, sin backend.
+**Interruptor**: la URL del Worker se configura en `public/index.html` con `<meta name="atc-api-base" content="...">`. **Vacío = clasificación desactivada**: el juego funciona igual y el enlace del inicio, el botón del resultado y el bloque de publicar se ocultan solos (`applyLeaderboardVisibility`). Los tests jsdom corren así, sin backend.
 
 **Decisiones de diseño:**
 - El alias se pide **al final**, en la pantalla de resultado, no antes de jugar: pedirlo antes metía un formulario en el punto de máximo abandono. Se guarda en `localStorage` (`armaTuCartelAlias`, `armaTuCartelCountry`, `armaTuCartelClientId`).
@@ -106,7 +115,21 @@ api/
 - No se guarda la IP en claro, solo `SHA-256(IP + IP_SALT)` para limitar abuso, con una purga sugerida a los 30 días al final de `schema.sql`.
 - El filtro de alias (`BLOCKLIST` en worker.js) es mínimo y hay que ampliarlo.
 
-**Pasos pendientes en Cloudflare** (no se pueden hacer desde el repo): crear la BD, aplicar el esquema, poner el secreto `IP_SALT`, desplegar y pegar la URL en el meta tag.
+**Pasos pendientes en Cloudflare** (no se pueden hacer desde el repo): crear la BD, aplicar el esquema, poner el secreto `IP_SALT`, desplegar y pegar la URL en el meta tag. ✅ Ya hecho — API en `https://arma-tu-cartel-api.djara.workers.dev`.
+
+## Despliegue
+
+**El sitio está publicado en Cloudflare Pages**: `https://arma-tu-cartel.pages.dev` (proyecto `arma-tu-cartel`, rama de producción `main`, carpeta de build `public/`). La API vive aparte, en el Worker de la sección anterior.
+
+- **Despliegue manual** (mientras no haya integración con Git — ver más abajo):
+  ```
+  wrangler pages deploy public --project-name=arma-tu-cartel --branch=main
+  ```
+  Se ejecuta desde la raíz del repo. Como `public/` ya contiene solo lo publicable, no hace falta copiar nada a una carpeta temporal.
+- **Integración con Git (repo → deploy automático)**: pendiente de conectar desde el dashboard de Cloudflare (Workers & Pages → proyecto `arma-tu-cartel` → Settings → Builds & deployments → Connect to Git), paso que requiere el navegador/cuenta de Diego y no se puede hacer desde el repo. Build command: ninguno. Build output directory: `public`. Una vez conectado, cada `git push` a `main` despliega solo, y las demás ramas generan URLs de preview — esas URLs de preview no están en `ALLOW_ORIGINS`, así que la clasificación no funcionará ahí hasta que se añadan si hace falta.
+- **CORS**: `ALLOW_ORIGINS` en `api/wrangler.toml` incluye `https://arma-tu-cartel.pages.dev` además de `localhost:8000` y `armatucartel.com`. Si el dominio final es otro, hay que añadirlo aquí y volver a hacer `wrangler deploy` en `api/` — si no, la clasificación fallará en silencio por CORS en el dominio nuevo.
+- **`armatucartel.com` sigue sin confirmarse** (ver sección "Naming y dominio"). Los meta tags `canonical`/`og:url` y las URLs dentro de `sitemap.xml`/`robots.txt` ya apuntan a ese dominio de forma aspiracional — hay que corregirlos si se acaba usando otro.
+- Verificado end-to-end contra el sitio real: carga de assets, `GET /api/leaderboard` y `POST /api/score` con CORS cruzado real (no local) — sin errores. La validación de longitud de alias en servidor (`MAX_ALIAS=16`) se confirmó de paso: un envío que saltaba el `maxlength` del HTML llegó truncado correctamente por el Worker.
 
 ## Mecánicas de juego y balance actual
 
@@ -142,15 +165,15 @@ Se valoró cambiar el nombre pero se decidió **mantener "Arma tu Cartel"**. Pun
 ## Roadmap de funcionalidades
 
 **Antes de lanzamiento público (pendiente):**
-- ~~Meta tags Open Graph + favicon + meta description~~ — **hecho**: description, OG, Twitter Card, favicon (emoji 🎪 provisional), theme-color y `og-image.jpg` (1200x630, generado por Canvas a partir de los assets reales) en index.html.
-- ~~Analítica básica y respetuosa con privacidad~~ — **hecho**: GoatCounter (sitio `armatucartel`, sin cookies, sin banner de consentimiento). Script en `index.html`. Eventos custom vía `trackEvent()` en js/app.js: `game-started` (startGame), `game-completed` (showResult), `poster-downloaded` (click en posterDownloadLink).
+- ~~Meta tags Open Graph + favicon + meta description~~ — **hecho**: description, OG, Twitter Card, favicon (emoji 🎪 provisional), theme-color y `og-image.jpg` (1200x630, generado por Canvas a partir de los assets reales) en `public/index.html`.
+- ~~Analítica básica y respetuosa con privacidad~~ — **hecho**: GoatCounter (sitio `armatucartel`, sin cookies, sin banner de consentimiento). Script en `public/index.html`. Eventos custom vía `trackEvent()` en `public/js/app.js`: `game-started` (startGame), `game-completed` (showResult), `poster-downloaded` (click en posterDownloadLink).
 - Pasada de QA visual en navegadores/dispositivos reales — **nunca hecha**.
 - ~~Aviso legal dentro de la propia app~~ — **hecho**: párrafo `.hero-disclaimer` al final de la pantalla de inicio (bajo el botón de empezar), bilingüe vía `landing.disclaimer`. Cubre: juego de fans sin relación oficial con artistas/representantes/discográficas, datos ficticios, imágenes generadas por IA (no fotos reales), y propiedad de nombres e imágenes. Estilo deliberadamente discreto (11px, `--muted`, opacidad 0.75).
 
 **Corto plazo:**
 - Modo "reto diario" (mismo pool de artistas para todos cada día) — la funcionalidad con más potencial viral identificada, estilo Wordle.
 - Formato de póster vertical 9:16 para Instagram Stories.
-- ~~Leaderboard real~~ — **fase 1 hecha** (ver sección "Clasificación"): API en `api/`, pantalla y bloque de publicar en el cliente. Pendiente: desplegar en Cloudflare y la fase 2 de verificación con semilla.
+- ~~Leaderboard real~~ — **fase 1 hecha** (ver sección "Clasificación"): API en `api/`, pantalla y bloque de publicar en el cliente. Pendiente: la fase 2 de verificación con semilla.
 
 **Más adelante:**
 - Modo cabeza a cabeza entre dos amigos (draft alternado).
