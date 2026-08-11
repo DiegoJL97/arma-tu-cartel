@@ -128,7 +128,7 @@ api/
 - Verificado end-to-end: una partida jugada de verdad en navegador (sin saltar, con decisiones reales) se capturó interceptando el `fetch` a `/api/score`, y su `{seed, picks, decisions}` se reprodujo de forma independiente tanto con `Engine.playGame()` en Node como contra `worker.js` corriendo en `wrangler dev --local` — los tres (cliente, replay en Node, Worker) dieron exactamente el mismo resultado (score, hype final, asistencia, géneros). También se probó que el Worker rechaza índices de elección fuera de rango, número incorrecto de decisiones, y el payload viejo de fase 1.
 - La validación de `picks`/`decisions` es de dos capas: `worker.js` descarta basura obvia a nivel de tipo/rango antes de tocar el motor (`sanitizePicks`, `sanitizeDecisions`), y `Engine.playGame()` valida contra la partida real (p. ej. el número exacto de decisiones lo determina la partida, no lo declara el cliente) — un intento de manipular la partida lanza un error y el Worker responde 400.
 - No se guarda la IP en claro, solo `SHA-256(IP + IP_SALT)` para limitar abuso, con una purga sugerida a los 30 días al final de `schema.sql`.
-- El filtro de alias (`BLOCKLIST` en worker.js) es mínimo y hay que ampliarlo.
+- El filtro de alias (`BLOCKLIST` en `worker.js`) coincide por subcadena tras normalizar (`isAliasAllowed`): quita acentos, sustituye leetspeak habitual (dígitos y símbolos `@ $ ! +` por su letra) y compara contra una lista ES/EN ampliada (queda documentado que sigue sin ser exhaustiva). Los radicales sin terminación (`pendej`, `retrasad`) atrapan variantes de género/plural con una sola entrada. Riesgo asumido y aceptado: alguna coincidencia por subcadena da falso positivo en palabras comunes (p. ej. `SpicyTaco` se bloquea por contener `spic`) — se prioriza no dejar pasar el insulto/slur sobre evitar ese roce ocasional.
 - Pendiente, no bloqueante: el modo reto diario (mismo seed para todos cada día) queda desbloqueado por esta misma infraestructura de semilla — ver roadmap.
 
 **Pasos pendientes en Cloudflare** (no se pueden hacer desde el repo): crear la BD, aplicar el esquema, poner el secreto `IP_SALT`, desplegar y pegar la URL en el meta tag. ✅ Ya hecho — API en `https://arma-tu-cartel-api.djara.workers.dev`.
@@ -137,7 +137,7 @@ api/
 
 ## Despliegue
 
-**El sitio está publicado en Cloudflare Pages**: `https://arma-tu-cartel.pages.dev` (proyecto `arma-tu-cartel`, rama de producción `main`, carpeta de build `public/`). La API vive aparte, en el Worker de la sección anterior.
+**El sitio está publicado en Cloudflare Pages**: dominio propio `https://armatucartel.com` (comprado con Cloudflare Registrar, DNS gestionado por Cloudflare), con `https://arma-tu-cartel.pages.dev` funcionando en paralelo como respaldo (proyecto `arma-tu-cartel`, rama de producción `main`, carpeta de build `public/`). `www.armatucartel.com` está conectado como dominio personalizado aparte y redirige (301, Redirect Rule en el dashboard) al dominio raíz. La API vive aparte, en el Worker de la sección anterior.
 
 - **Despliegue manual** (mientras no haya integración con Git — ver más abajo):
   ```
@@ -146,8 +146,8 @@ api/
   Se ejecuta desde la raíz del repo. Como `public/` ya contiene solo lo publicable, no hace falta copiar nada a una carpeta temporal.
 - **Integración con Git (repo → deploy automático)**: pendiente de conectar desde el dashboard de Cloudflare (Workers & Pages → proyecto `arma-tu-cartel` → Settings → Builds & deployments → Connect to Git), paso que requiere el navegador/cuenta de Diego y no se puede hacer desde el repo. Build command: ninguno. Build output directory: `public`. Una vez conectado, cada `git push` a `main` despliega solo, y las demás ramas generan URLs de preview — esas URLs de preview no están en `ALLOW_ORIGINS`, así que la clasificación no funcionará ahí hasta que se añadan si hace falta.
 - **CORS**: `ALLOW_ORIGINS` en `api/wrangler.toml` incluye `https://arma-tu-cartel.pages.dev` además de `localhost:8000` y `armatucartel.com`. Si el dominio final es otro, hay que añadirlo aquí y volver a hacer `wrangler deploy` en `api/` — si no, la clasificación fallará en silencio por CORS en el dominio nuevo.
-- **`armatucartel.com` sigue sin confirmarse** (ver sección "Naming y dominio"). Los meta tags `canonical`/`og:url` y las URLs dentro de `sitemap.xml`/`robots.txt` ya apuntan a ese dominio de forma aspiracional — hay que corregirlos si se acaba usando otro.
-- Verificado end-to-end contra el sitio real: carga de assets, `GET /api/leaderboard` y `POST /api/score` con CORS cruzado real (no local) — sin errores. La validación de longitud de alias en servidor (`MAX_ALIAS=16`) se confirmó de paso: un envío que saltaba el `maxlength` del HTML llegó truncado correctamente por el Worker.
+- **`armatucartel.com` ya está confirmado y activo** (ver sección "Naming y dominio"). Los meta tags `canonical`/`og:url` y las URLs dentro de `sitemap.xml`/`robots.txt` ya apuntaban a ese dominio de forma aspiracional desde antes de comprarlo — no hizo falta tocar nada en el código al conectarlo.
+- Verificado end-to-end contra el sitio real: carga de assets, `GET /api/leaderboard` y `POST /api/score` con CORS cruzado real (no local) — sin errores. La validación de longitud de alias en servidor (`MAX_ALIAS=16`) se confirmó de paso: un envío que saltaba el `maxlength` del HTML llegó truncado correctamente por el Worker. Repetido tras conectar `armatucartel.com`: assets, consola sin errores, y `GET /api/leaderboard` con CORS real desde el dominio propio — también sin errores. El redirect de `www` se probó con ruta y query string (`www.armatucartel.com/privacidad.html?utm_test=1` → `https://armatucartel.com/privacidad?utm_test=1`, la caída de `.html` es el propio comportamiento de "pretty URLs" de Cloudflare Pages, no algo configurado a mano).
 
 ## Mecánicas de juego y balance actual
 
@@ -177,7 +177,7 @@ Se valoró cambiar el nombre pero se decidió **mantener "Arma tu Cartel"**. Pun
 - La traducción al inglés del *branding* usa **"Build Your Lineup"**, no una traducción literal de "cartel" (en inglés "cartel" se lee casi siempre como cartel de droga, no como póster de festival).
 - `buildyourlineup.com` se descartó como dominio: "build your lineup" es una frase genérica ya saturada por toda la industria del fantasy sports (DraftKings, FanDuel y decenas de "lineup optimizers"), mala para SEO y sin ninguna señal de reggaetón/festival.
 - `cartelurbano.com` ya es un medio colombiano de cultura urbana con 15+ años — evitar nombres parecidos.
-- `armatucartel.com` dio una respuesta ambigua al consultarlo (podría estar registrado por una red de sitios tipo "armatucoso.com"); pendiente de verificar en un registrador real. Alternativas si no está libre: `.app`, `.games`, `.fun`.
+- `armatucartel.com` estaba libre pese a la respuesta ambigua inicial — **comprado y en producción** (ver "Despliegue").
 - Si algún día se quiere una marca 100% bilingüe sin depender de "cartel", las ideas mejor valoradas fueron (en orden): **Fantasy Cartel**, **Cartelero**, **Perreo Draft**, **Fantasy Reggaetón**.
 
 ## Roadmap de funcionalidades

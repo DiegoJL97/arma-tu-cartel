@@ -11,9 +11,9 @@ database_name = "arma-tu-cartel"
 database_id = "cbda8d1b-ac94-41f4-9e89-6226fc3180de"
 
 [vars]
-# Origenes autorizados a llamar la API. arma-tu-cartel.pages.dev es la URL
-# real ya desplegada; armatucartel.com queda por si se confirma el dominio.
-# '*' dejaria pasar a cualquiera (no usar salvo para depurar).
+# Origenes autorizados a llamar la API. armatucartel.com es el dominio
+# propio en produccion; arma-tu-cartel.pages.dev queda activo en paralelo
+# como respaldo. '*' dejaria pasar a cualquiera (no usar salvo para depurar).
 ALLOW_ORIGINS = "http://localhost:8000,https://arma-tu-cartel.pages.dev,https://armatucartel.com"
 
 # IP_SALT no va aqui: es un secreto.

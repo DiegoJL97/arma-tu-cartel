@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">404 — Arma tu Cartel</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0B0A14">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AA%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .nf-wrap{
+    min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:40px 20px;
+  }
+  .nf-lang{ position:absolute; top:16px; right:16px; }
+  .nf-emoji{ font-size:56px; margin-bottom:6px; }
+  .nf-code{
+    font-family:'JetBrains Mono', monospace; font-size:13px; letter-spacing:0.18em;
+    color:var(--cyan); text-transform:uppercase; margin:0 0 14px;
+  }
+  .nf-title{
+    font-family:'Anton', sans-serif; font-weight:400; font-size:clamp(32px,7vw,52px);
+    line-height:1.05; margin:0 0 16px;
+    background: linear-gradient(100deg, var(--text) 35%, var(--pink) 75%, var(--gold) 100%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .nf-body{ color:var(--muted); font-size:15px; line-height:1.6; max-width:420px; margin:0 0 32px; }
+  .nf-back{
+    font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:15px;
+    padding:14px 30px; border-radius:999px; text-decoration:none;
+    color:#0B0A14; background: linear-gradient(100deg, var(--pink) 0%, var(--gold) 100%);
+    box-shadow: 0 6px 24px rgba(255,46,147,0.28);
+  }
+</style>
+</head>
+<body>
+
+<div class="nf-wrap">
+  <button class="lang-toggle nf-lang" id="nfLangToggle" aria-label="Change language / Cambiar idioma">EN</button>
+  <div class="nf-emoji">🎪</div>
+  <p class="nf-code" id="nfCode">ERROR 404</p>
+  <h1 class="nf-title" id="nfTitle">No hemos encontrado este cartel</h1>
+  <p class="nf-body" id="nfBody">Esta página no existe o se ha movido. Prueba a armar uno nuevo desde el inicio.</p>
+  <a class="nf-back" href="/" id="nfBack">Volver al inicio</a>
+</div>
+
+<script>
+(function(){
+  var LANG_KEY = 'armaTuCartelLang';
+  var lang = 'es';
+  try {
+    var stored = window.localStorage.getItem(LANG_KEY);
+    if (stored === 'es' || stored === 'en') lang = stored;
+  } catch(e){}
+
+  var T = {
+    es: {
+      pageTitle: '404 — Arma tu Cartel',
+      code: 'ERROR 404',
+      title: 'No hemos encontrado este cartel',
+      body: 'Esta página no existe o se ha movido. Prueba a armar uno nuevo desde el inicio.',
+      back: 'Volver al inicio'
+    },
+    en: {
+      pageTitle: '404 — Arma tu Cartel',
+      code: 'ERROR 404',
+      title: "We couldn't find that lineup",
+      body: "This page doesn't exist or has moved. Try building a new one from the home screen.",
+      back: 'Back to home'
+    }
+  };
+
+  function render(){
+    var t = T[lang];
+    document.documentElement.setAttribute('lang', lang);
+    document.title = t.pageTitle;
+    document.getElementById('pageTitle').textContent = t.pageTitle;
+    document.getElementById('nfCode').textContent = t.code;
+    document.getElementById('nfTitle').textContent = t.title;
+    document.getElementById('nfBody').textContent = t.body;
+    document.getElementById('nfBack').textContent = t.back;
+    document.getElementById('nfLangToggle').textContent = lang === 'es' ? 'EN' : 'ES';
+  }
+
+  document.getElementById('nfLangToggle').addEventListener('click', function(){
+    lang = lang === 'es' ? 'en' : 'es';
+    try { window.localStorage.setItem(LANG_KEY, lang); } catch(e){}
+    render();
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
