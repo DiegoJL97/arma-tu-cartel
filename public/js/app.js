@@ -88,7 +88,7 @@ import * as Engine from './engine.js';
         coffeeBtn: '☕ Invítame a un café'
       },
       mailto: { subject: 'Sugerencia - Arma tu Cartel' },
-      poster: { title: 'ARMA TU CARTEL' },
+      poster: { title: 'ARMATUCARTEL.COM' },
       share: { myLineup: 'Mi cartel' },
       lb: {
         viewBtn: '🏆 Ver clasificación',
@@ -197,7 +197,7 @@ import * as Engine from './engine.js';
         coffeeBtn: '☕ Buy me a coffee'
       },
       mailto: { subject: 'Suggestion - Build Your Lineup' },
-      poster: { title: 'BUILD YOUR LINEUP' },
+      poster: { title: 'ARMATUCARTEL.COM' },
       share: { myLineup: 'My lineup' },
       lb: {
         viewBtn: '🏆 View leaderboard',
@@ -1127,6 +1127,11 @@ import * as Engine from './engine.js';
 
   /* ---------- loading + results ---------- */
   function runLoadingThenSimulation(){
+    // El overlay tapa las tarjetas de la ronda 10 visualmente, pero un click
+    // real de raton ya queda bloqueado por su z-index; esto es para activacion
+    // por teclado (Enter/Espacio no respeta el overlay), que podia fichar al
+    // mismo artista dos veces mientras esperaba el paso a la simulacion.
+    document.querySelectorAll('#choiceGrid .choice-card').forEach(function(card){ card.disabled = true; });
     document.getElementById('loadingText').textContent = t('loading.closing');
     document.getElementById('loadingOverlay').classList.add('active');
     setTimeout(function(){
@@ -1775,8 +1780,15 @@ import * as Engine from './engine.js';
 
     var cursor = 44;
 
-    var titleFont = '400 80px "Titan One", sans-serif';
     var titleText = t('poster.title');
+    var titleSize = 80;
+    var titleFont = '400 ' + titleSize + 'px "Titan One", sans-serif';
+    ctx.font = titleFont;
+    while(titleSize > 40 && ctx.measureText(titleText).width > maxTextWidth){
+      titleSize -= 2;
+      titleFont = '400 ' + titleSize + 'px "Titan One", sans-serif';
+      ctx.font = titleFont;
+    }
     var tm = posterFontMetrics(ctx, titleFont, titleText);
     var titleBaseline = cursor + tm.ascent;
     ops.push({ kind: 'text', text: titleText, font: titleFont, color: '#F5F0FA', x: centerX, y: titleBaseline });
