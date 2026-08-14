@@ -219,6 +219,10 @@ Se valoró cambiar el nombre pero se decidió **mantener "Arma tu Cartel"**. Pun
 
 Botón de sugerencias en la pantalla de resultado → `mailto:armatucartel@gmail.com`. El asunto del email cambia según el idioma activo.
 
+## Redes sociales
+
+Iconos de X e Instagram (`.corner-actions`) en la esquina superior derecha de inicio, resultado y clasificación, junto al botón de idioma — mismo contenedor, mismo criterio de posicionamiento (`position:absolute` dentro de la `.screen`, no fijo). **No aparecen en juego/simulación a propósito**: la topbar de esas dos pantallas ya va justa de ancho en móvil (ver trampas del móvil más arriba) y añadir más elementos ahí reabriría ese riesgo justo en plena partida, que no es el momento en que alguien piensa en seguir las redes. SVG propios (sin librería de iconos), con `currentColor` para que el hover cambie de color solo. Enlazan a `x.com/armatucartel` e `instagram.com/armatucartel`, `target="_blank"`, con eventos de analítica `social-click-x` / `social-click-instagram` (mismo patrón que `coffee-click`).
+
 ## Monetización
 
 Botón de donación (`#coffeeLink`) en la pantalla de resultado, junto al de sugerencias → Ko-fi de Diego (`https://ko-fi.com/diegojaralopez`), `target="_blank"`. Se eligió Ko-fi sobre Buy Me a Coffee por su comisión (0% de plataforma, solo la del procesador de pago, frente al 5% extra de BMC). Evento de analítica `coffee-click` al pulsarlo (mismo patrón que `poster-downloaded`). Es la única vía de monetización del proyecto por ahora; se descartó meter anuncios (choca con la analítica sin cookies ya elegida) y vender el póster como producto físico (subiría el perfil legal: pasaría de "juego de fans con imágenes de IA" a vender un producto comercial con nombres/imágenes de artistas reales, justo lo que el disclaimer del landing dice que se evita).

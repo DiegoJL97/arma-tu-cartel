@@ -198,14 +198,30 @@
     transition: color .2s ease, border-color .2s ease;
   }
   .lang-toggle:hover{ color: var(--pink); border-color: var(--pink); }
-  /* No es position:fixed a proposito (cambio explicito de Diego): en las
-     pantallas sin topbar (inicio, resultado, clasificacion) se posiciona
-     dentro de esa .screen (que ahora es el contexto de posicionamiento,
-     ver ".screen" mas arriba), asi que se desplaza con el contenido en vez
-     de quedar pegado al viewport. En juego y simulacion el boton ya no usa
-     esta clase: vive dentro de .topbar-right, como un pill mas. */
-  .lang-toggle-floating{
+  /* Grupo de acciones flotante (redes sociales + idioma) en inicio,
+     resultado y clasificacion. No es position:fixed a proposito (cambio
+     explicito de Diego): se posiciona dentro de esa .screen (que es el
+     contexto de posicionamiento, ver ".screen" mas arriba), asi que se
+     desplaza con el contenido en vez de quedar pegado al viewport. No
+     aparece en juego/simulacion: la topbar de esas pantallas ya va justa
+     de ancho en movil (ver trampas del movil en CLAUDE.md), y anadir mas
+     elementos ahi reabriria ese riesgo justo cuando el jugador esta en
+     plena partida, no pensando en seguir las redes. */
+  .corner-actions{
     position: absolute; top:16px; right:16px; z-index:100;
+    display:flex; align-items:center; gap:10px;
+  }
+  .corner-social-link{
+    display:flex; align-items:center; justify-content:center;
+    width:32px; height:32px; border-radius:50%;
+    color: var(--text); opacity:0.85;
+    transition: opacity .2s ease, color .2s ease, background .2s ease;
+  }
+  .corner-social-link svg{ width:18px; height:18px; display:block; }
+  .corner-social-link:hover{ opacity:1; color: var(--cyan); background: rgba(255,255,255,0.06); }
+  /* El boton de idioma ya no controla su propia posicion: la lleva
+     .corner-actions, esta clase solo aporta el fondo esmerilado. */
+  .lang-toggle-floating{
     background: rgba(21,18,31,0.85); backdrop-filter: blur(6px);
   }
   .btn-hero-pill .btn-arrow{ display:inline-block; margin-left:6px; transition: transform .15s ease; }
@@ -798,6 +814,10 @@
   @media (max-width: 767px){
 
     /* ---- 1. INICIO ---- */
+    /* El grupo de iconos sociales + idioma (.corner-actions) mide 32px de
+       alto en la esquina superior derecha; sin este hueco el titulo podia
+       quedar centrado lo bastante arriba como para solaparse con el. */
+    .hero-content{ padding-top: 56px; }
     h1.title{ font-size:40px; margin-bottom:18px; }
     .hero-collage{ margin: 6px 0 12px; }
     .hero-collage-photo, .hero-collage-more{
@@ -947,7 +967,9 @@
     }
 
     /* ---- 4. RESULTADO ---- */
-    .wrap{ padding:14px 16px 16px; }
+    /* Mismo motivo que .hero-content/.lb-wrap: hueco para .corner-actions,
+       aqui se solapaba con el eyebrow "Resultado" de arriba. */
+    .wrap{ padding:62px 16px 16px; }
     #screen-result h1.title{ margin-bottom:8px; }
     .score-ring-wrap{ width:132px; height:132px; margin-top:6px; }
     .score-ring-track, .score-ring-fill{ stroke-width:11; }
@@ -1007,7 +1029,10 @@
     .hero-cta-group{ gap:10px; }
 
     /* ---- clasificación ---- */
-    .lb-wrap{ padding:16px 14px 22px; }
+    /* padding-top a 56px por la misma razon que .hero-content: hueco para
+       .corner-actions (iconos sociales + idioma), que aqui se solapaba
+       directamente con .lb-title. */
+    .lb-wrap{ padding:62px 14px 22px; }
     .lb-title{ font-size:27px; }
     .lb-subtitle{ font-size:9.5px; margin-bottom:14px; }
     .lb-tabs{ margin-bottom:12px; }

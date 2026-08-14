@@ -88,6 +88,7 @@ import * as Engine from './engine.js';
         coffeeBtn: '☕ Invítame a un café'
       },
       mailto: { subject: 'Sugerencia - Arma tu Cartel' },
+      social: { x: 'Síguenos en X', instagram: 'Síguenos en Instagram' },
       poster: { title: 'ARMATUCARTEL.COM' },
       share: { myLineup: 'Mi cartel' },
       lb: {
@@ -197,6 +198,7 @@ import * as Engine from './engine.js';
         coffeeBtn: '☕ Buy me a coffee'
       },
       mailto: { subject: 'Suggestion - Build Your Lineup' },
+      social: { x: 'Follow us on X', instagram: 'Follow us on Instagram' },
       poster: { title: 'ARMATUCARTEL.COM' },
       share: { myLineup: 'My lineup' },
       lb: {
@@ -1919,6 +1921,13 @@ import * as Engine from './engine.js';
 
   document.getElementById('coffeeLink').addEventListener('click', function(){
     trackEvent('coffee-click');
+  });
+
+  document.querySelectorAll('.social-x-link').forEach(function(el){
+    el.addEventListener('click', function(){ trackEvent('social-click-x'); });
+  });
+  document.querySelectorAll('.social-instagram-link').forEach(function(el){
+    el.addEventListener('click', function(){ trackEvent('social-click-instagram'); });
   });
 
   document.getElementById('posterShareBtn').addEventListener('click', function(){
