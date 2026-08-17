@@ -64,11 +64,11 @@
     position: relative;
     z-index: 5;
     text-align:center;
-    padding: 0 20px;
+    padding: 64px 20px 0; /* hueco fijo para .corner-actions (iconos + idioma), siempre 16-48px arriba a la derecha */
     max-width: 640px;
     margin: auto 0; /* absorbe el espacio libre: centra el bloque y empuja el aviso al borde inferior */
   }
-  .hero-content-wide{ max-width: 920px; }
+  .hero-content-wide{ max-width: 1100px; }
 
   .eyebrow{
     font-family:'JetBrains Mono', monospace;
@@ -103,8 +103,12 @@
   .hero-sub{ color: var(--text); opacity: 0.85; font-size: 16px; line-height: 1.6; margin: 0 0 30px; text-shadow: 0 2px 12px rgba(0,0,0,0.6); }
 
   .hero-collage{ display:flex; flex-wrap:wrap; justify-content:center; row-gap:16px; margin: 72px 0 64px; }
+  /* 155px: con el solapado de -45px, las 9 caras (8 + el contador) ocupan
+     ~1035px, caben en una sola fila dentro de .hero-content-wide (1100px
+     menos su padding). A 213px hacian falta ~1557px y siempre se partian
+     en dos filas por mucho que fuera de ancho la ventana. */
   .hero-collage-photo{
-    width:213px; height:213px; border-radius:50%; overflow:hidden; flex-shrink:0;
+    width:155px; height:155px; border-radius:50%; overflow:hidden; flex-shrink:0;
     border:3px solid var(--pink); margin-left:-45px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.45);
     background-size:cover; background-position:center 20%;
@@ -116,7 +120,7 @@
   .hero-collage-photo:nth-child(odd){ transform: translateY(-16px); }
   .hero-collage-photo:nth-child(even){ transform: translateY(16px); }
   .hero-collage-more{
-    width:213px; height:213px; border-radius:50%; margin-left:-45px; flex-shrink:0;
+    width:155px; height:155px; border-radius:50%; margin-left:-45px; flex-shrink:0;
     background: var(--bg-panel); border:2px solid var(--line);
     display:flex; align-items:center; justify-content:center;
     font-family:'JetBrains Mono', monospace; font-size:22px; font-weight:700; color:var(--gold);
@@ -150,9 +154,9 @@
   .hero-privacy-link:hover{ opacity:1; color: var(--cyan); }
 
   @media (max-height: 820px){
-    /* Con poca altura de ventana el titulo quedaba pegado al borde
-       superior (el bloque centrado no dejaba aire arriba). */
-    .hero-content{ padding-top: 22px; }
+    /* El hueco para .corner-actions ya lo da .hero-content de forma
+       incondicional (ver regla base); aqui solo se encoge el resto para
+       que quepa en poca altura. */
     .hero-collage{ margin: 34px 0 32px; }
     .hero-collage-photo, .hero-collage-more{ width:125px; height:125px; }
     .hero-collage-caption{ margin-bottom:32px; }
@@ -814,10 +818,8 @@
   @media (max-width: 767px){
 
     /* ---- 1. INICIO ---- */
-    /* El grupo de iconos sociales + idioma (.corner-actions) mide 32px de
-       alto en la esquina superior derecha; sin este hueco el titulo podia
-       quedar centrado lo bastante arriba como para solaparse con el. */
-    .hero-content{ padding-top: 56px; }
+    /* El hueco para .corner-actions ya lo da .hero-content de forma
+       incondicional (ver regla base), vale igual aqui. */
     h1.title{ font-size:40px; margin-bottom:18px; }
     .hero-collage{ margin: 6px 0 12px; }
     .hero-collage-photo, .hero-collage-more{
